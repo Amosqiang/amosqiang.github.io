@@ -12,11 +12,12 @@ theme: minima
 plugins:
   - jekyll-feed
 
-# Collections
-collections:
+# collections:
   posts:
     output: true
-    order_by: date
+    sort_by: date
+    order: desc
+
 
 # Exclude from processing.
 # The following items will not be processed, by default.
