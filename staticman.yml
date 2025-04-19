@@ -1,15 +1,31 @@
-endpoint: https://your-netlify-site.netlify.app/.netlify/functions/staticman
-branch: master # 你用于部署博客的分支
-fields:
-  - name: name
-    label: Name
-    type: text
-    required: true
-  - name: email
-    label: Email
-    type: email
-    required: true
-  - name: comment
-    label: Comment
-    type: textarea
-    required: true
+{% if page.comments %}
+  <h2>Leave a Comment</h2>
+  <form
+    action="https://neon-meerkat-c39acd.netlify.app/.netlify/functions/staticman"
+    method="POST"
+  >
+    <input type="hidden" name="options[slug]" value="{{ page.slug }}">
+    <input
+      type="hidden"
+      name="options[redirect]"
+      value="{{ page.url | absolute_url }}"
+    >
+
+    <div>
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+
+    <div>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email">
+    </div>
+
+    <div>
+      <label for="comment">Comment:</label>
+      <textarea id="comment" name="comment" rows="5" required></textarea>
+    </div>
+
+    <button type="submit">Submit Comment</button>
+  </form>
+{% endif %}
