@@ -1,0 +1,15 @@
+endpoint: https://your-netlify-site.netlify.app/.netlify/functions/staticman
+branch: master # 你用于部署博客的分支
+fields:
+  - name: name
+    label: Name
+    type: text
+    required: true
+  - name: email
+    label: Email
+    type: email
+    required: true
+  - name: comment
+    label: Comment
+    type: textarea
+    required: true
