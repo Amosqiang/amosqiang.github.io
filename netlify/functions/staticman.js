@@ -1,4 +1,9 @@
-const YAML = require('js-yaml');
+import * as YAML from 'js-yaml';
+
+console.log("typeof YAML:", typeof YAML);
+if (YAML) {
+  console.log("YAML.stringify:", YAML.stringify);
+}
 
 exports.handler = async function(event, context) {
   let Octokit;
