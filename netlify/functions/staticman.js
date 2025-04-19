@@ -1,7 +1,19 @@
-const { Octokit } = require("@octokit/rest");
 const YAML = require('js-yaml');
 
 exports.handler = async function(event, context) {
+  let Octokit;
+  try {
+    const octokitModule = await import("@octokit/rest");
+    Octokit = octokitModule.Octokit;
+  } catch (error) {
+    console.error("Error importing @octokit/rest:", error);
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: "Failed to import @octokit/rest" }),
+    };
+  }
+
   const headers = {
     'Access-Control-Allow-Origin': 'https://amosqiang.github.io', // 替换为你的博客域名
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
