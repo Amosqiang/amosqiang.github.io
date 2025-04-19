@@ -10,7 +10,7 @@ post_comments:
   format: "yml" # 评论文件格式
   # 评论存储路径，确保 _data/comments 目录存在或可被创建
   path: "_data/comments/{options.slug}"
-  requiredFields: ["name", "email", "comment"] # 必填字段
+  requiredFields: ["comment"] # 必填字段
   transforms:
     email: md5 # 将 email 转为 md5 (用于 Gravatar)
 

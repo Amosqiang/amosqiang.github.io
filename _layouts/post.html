@@ -37,28 +37,34 @@ layout: base
   {%- endif -%}
   {%- endcomment -%}
 
-  <hr> <section id="static-comments">
+  <hr>
+  <section id="static-comments">
     <h2>Comments</h2>
 
     {%- comment -%}
     {%- assign comments_path = "_data/comments/" | append: page.slug | append: "/" -%}
-    {%- assign comment_files = site.static_files | where_exp: "item", "item.path contains comments_path" -%}
-    {%- assign comments = "" | split: "" -%}
-    {%- for file in comment_files -%}
-      {%- assign comment_data = file.path | read_yaml -%}
-      {%- assign comments = comments | push: comment_data -%}
-    {%- endfor -%}
+    {%- assign comments = site.data.comments[page.slug] | default: empty -%}
 
-    {%- assign comments = comments | sort: "_id" -%}
+    {%- if comments and comments != empty -%}
+      {%- assign comments_array = comments | map: "last" | sort: "_id" -%}
+    {%- else -%}
+      {%- assign comments_array = "" | split: "" -%}
+    {%- endif -%}
 
-    {%- if comments.size > 0 -%}
+    {%- if comments_array.size > 0 -%}
       <div id="comments-list">
-        {%- for comment in comments -%}
+        {%- for comment in comments_array -%}
           <article id="comment-{{ comment._id }}" class="static-comment">
             <header class="comment-header">
-              <img src="https://www.gravatar.com/avatar/{{ comment.email }}?s=40&d=mp" alt="{{ comment.name | escape }}'s avatar" width="40" height="40">
-              <strong>{{ comment.name | escape }}</strong>
+              {%- if comment.email -%}
+                <img src="https://www.gravatar.com/avatar/{{ comment.email }}?s=40&d=mp" alt="{{ comment.name | default: 'Anonymous' | escape }}'s avatar" width="40" height="40">
+              {%- else -%}
+                <img src="https://www.gravatar.com/avatar/?s=40&d=mp" alt="Anonymous avatar" width="40" height="40">
+              {%- endif -%}
+              <strong>{{ comment.name | default: "Anonymous" | escape }}</strong>
+              {%- if comment._date -%}
               <small> - <time datetime="{{ comment._date | date_to_xmlschema }}">{{ comment._date | date: "%Y-%m-%d %H:%M" }}</time></small>
+              {%- endif -%}
             </header>
             <div class="comment-body">
               {{ comment.comment | markdownify }}
@@ -71,18 +77,22 @@ layout: base
     {%- endif -%}
     {%- endcomment -%}
 
+
     <h3>Leave a Comment</h3>
-    <form id="comment-form" method="post" action="{{ site.staticman.endpoint | default: site.staticman_endpoint | default: site.staticman_instance }}">
+    <form id="comment-form" method="post" action="https://neon-meerkat-c39acd.netlify.app/.netlify/functions/staticman">
       <input type="hidden" name="options[origin]" value="{{ page.url | absolute_url }}">
       <input type="hidden" name="options[slug]" value="{{ page.slug }}">
-      <input type="hidden" name="options[parent]" value=""> <input type="hidden" name="fields[reply_to]" value=""> <div class="form-group">
-        <label for="comment-form-name">Name <span class="required">*</span></label>
-        <input type="text" id="comment-form-name" name="fields[name]" required>
+      <input type="hidden" name="options[parent]" value="">
+      <input type="hidden" name="fields[reply_to]" value="">
+
+      <div class="form-group">
+        <label for="comment-form-name">Name (Optional)</label>
+        <input type="text" id="comment-form-name" name="fields[name]">
       </div>
 
       <div class="form-group">
-        <label for="comment-form-email">Email (will not be published) <span class="required">*</span></label>
-        <input type="email" id="comment-form-email" name="fields[email]" required>
+        <label for="comment-form-email">Email (Optional, not published, used for Gravatar)</label>
+        <input type="email" id="comment-form-email" name="fields[email]">
       </div>
 
       <div class="form-group">
@@ -95,10 +105,10 @@ layout: base
       <button type="submit" class="btn">Submit Comment</button>
     </form>
   </section>
+
   <p style="text-align: right; font-size: smaller; color: #888;">
     Page generated: {{ site.time | date: "%Y-%m-%d %H:%M:%S %Z" }}
   </p>
-
 
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
 </article>
@@ -110,16 +120,16 @@ layout: base
     if (!form) return;
 
     form.addEventListener('submit', function (event) {
-      event.preventDefault(); // 阻止默认提交
+      event.preventDefault(); // Prevent default submit
 
       message.textContent = 'Submitting...';
       message.style.color = 'inherit';
       var formData = new FormData(form);
-      var actionUrl = form.action; // 获取表单的 action URL
+      var actionUrl = form.action; // Get form action URL
 
-      // 确保 action URL 存在
-      if (!actionUrl || actionUrl === 'YOUR_NETLIFY_FUNCTION_URL') {
-          message.textContent = 'Error: Staticman endpoint URL is not configured correctly in the template or _config.yml.';
+      // Ensure action URL exists
+      if (!actionUrl || actionUrl === 'YOUR_NETLIFY_FUNCTION_URL' || actionUrl === window.location.href) { // Added check for current page URL
+          message.textContent = 'Error: Staticman endpoint URL is not configured correctly in the template.';
           message.style.color = 'red';
           console.error('Staticman endpoint URL missing or incorrect:', actionUrl);
           return;
@@ -129,19 +139,49 @@ layout: base
         method: 'POST',
         body: formData
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          message.textContent = 'Thanks! Your comment has been submitted and is awaiting moderation (if enabled) or processing.';
-          message.style.color = 'green';
-          form.reset(); // 清空表单
-          // 可选：几秒后清除消息
-          // setTimeout(() => { message.textContent = ''; }, 5000);
-        } else {
-          console.error('Staticman submission error:', data);
-          message.textContent = 'Error: ' + (data.message || 'Could not submit comment.');
-          message.style.color = 'red';
-        }
+      .then(response => {
+          // Check if response is JSON, otherwise handle as text
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.indexOf("application/json") !== -1) {
+              return response.json().then(data => ({ ok: response.ok, status: response.status, body: data }));
+          } else {
+              return response.text().then(text => ({ ok: response.ok, status: response.status, body: text }));
+          }
+      })
+      .then(result => {
+          // Check if the HTTP status code indicates success (e.g., 200 OK, 302 Found for redirect)
+          // Staticman v3 often redirects on success (302)
+          if (result.ok || result.status === 302) {
+              // Attempt to parse body if it's JSON-like string
+              let successData = result.body;
+              if (typeof result.body === 'string') {
+                  try { successData = JSON.parse(result.body); } catch (e) { /* Ignore parsing error if it's just text */ }
+              }
+
+              // Check for success flag if body is an object, otherwise assume success on OK/Redirect status
+              if (typeof successData === 'object' && successData !== null && successData.success === false) {
+                  console.error('Staticman submission error:', successData);
+                  message.textContent = 'Error: ' + (successData.message || 'Could not submit comment.');
+                  message.style.color = 'red';
+              } else {
+                   message.textContent = 'Thanks! Your comment has been submitted and is awaiting moderation (if enabled) or processing.';
+                   message.style.color = 'green';
+                   form.reset(); // Clear form
+              }
+          } else {
+              // Handle non-ok responses (e.g., 4xx, 5xx errors)
+              console.error('Staticman submission error:', result.status, result.body);
+              let errorMsg = 'Could not submit comment.';
+              // Try to get a message from the response body
+              if (typeof result.body === 'object' && result.body !== null && result.body.message) {
+                  errorMsg = result.body.message;
+              } else if (typeof result.body === 'string' && result.body.length < 200) { // Show short text errors
+                  errorMsg = result.body;
+              }
+              message.textContent = 'Error (' + result.status + '): ' + errorMsg;
+              message.style.color = 'red';
+          }
+
       })
       .catch(error => {
         console.error('Network or fetch error:', error);
