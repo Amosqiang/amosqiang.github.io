@@ -1,22 +1,35 @@
-title: Truth is between you and me 
+title: Truth is between you and me
 email: thinner_01sullen@icloud.com
-description: >- # this means to ignore newlines until "baseurl:"
-  Life is meaningless unless got to make a sense 
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+description: >-
+  Life is meaningless unless got to make a sense
+baseurl: "" # 网站的子路径，例如 /blog
+url: "" # 网站的基础 URL，例如 http://example.com
 twitter_username: amosqiang
-github_username:  amosqiang
+github_username: amosqiang
 
-# Build settings
+# 构建设置
 theme: minima
 plugins:
   - jekyll-feed
 
-# collections:
+collections:
   posts:
     output: true
     sort_by: date
     order: desc
+
+# 排除处理的文件和目录
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
 
 
 # Exclude from processing.
