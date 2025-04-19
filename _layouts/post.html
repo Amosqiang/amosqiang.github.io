@@ -11,7 +11,7 @@ layout: base
         {{ page.date | date: date_format }}
       </time>
       {%- if page.modified_date -%}
-        ~ 
+        ~
         {%- assign mdate = page.modified_date | date_to_xmlschema -%}
         <time class="dt-modified" datetime="{{ mdate }}" itemprop="dateModified">
           {{ mdate | date: date_format }}
@@ -21,18 +21,133 @@ layout: base
         • {% for author in page.author %}
           <span itemprop="author" itemscope itemtype="http://schema.org/Person">
             <span class="p-author h-card" itemprop="name">{{ author }}</span></span>
-            {%- if forloop.last == false %}, {% endif -%}
+          {%- if forloop.last == false %}, {% endif -%}
         {% endfor %}
-      {%- endif -%}</p>
+      {%- endif -%}
+    </p>
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
     {{ content }}
   </div>
 
+  {%- comment -%}
   {%- if site.disqus.shortname -%}
     {%- include disqus_comments.html -%}
   {%- endif -%}
+  {%- endcomment -%}
+
+  <hr> <section id="static-comments">
+    <h2>Comments</h2>
+
+    {%- comment -%}
+    {%- assign comments_path = "_data/comments/" | append: page.slug | append: "/" -%}
+    {%- assign comment_files = site.static_files | where_exp: "item", "item.path contains comments_path" -%}
+    {%- assign comments = "" | split: "" -%}
+    {%- for file in comment_files -%}
+      {%- assign comment_data = file.path | read_yaml -%}
+      {%- assign comments = comments | push: comment_data -%}
+    {%- endfor -%}
+
+    {%- assign comments = comments | sort: "_id" -%}
+
+    {%- if comments.size > 0 -%}
+      <div id="comments-list">
+        {%- for comment in comments -%}
+          <article id="comment-{{ comment._id }}" class="static-comment">
+            <header class="comment-header">
+              <img src="https://www.gravatar.com/avatar/{{ comment.email }}?s=40&d=mp" alt="{{ comment.name | escape }}'s avatar" width="40" height="40">
+              <strong>{{ comment.name | escape }}</strong>
+              <small> - <time datetime="{{ comment._date | date_to_xmlschema }}">{{ comment._date | date: "%Y-%m-%d %H:%M" }}</time></small>
+            </header>
+            <div class="comment-body">
+              {{ comment.comment | markdownify }}
+            </div>
+            </article>
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <p>Be the first to comment!</p>
+    {%- endif -%}
+    {%- endcomment -%}
+
+    <h3>Leave a Comment</h3>
+    <form id="comment-form" method="post" action="{{ site.staticman.endpoint | default: site.staticman_endpoint | default: site.staticman_instance }}">
+      <input type="hidden" name="options[origin]" value="{{ page.url | absolute_url }}">
+      <input type="hidden" name="options[slug]" value="{{ page.slug }}">
+      <input type="hidden" name="options[parent]" value=""> <input type="hidden" name="fields[reply_to]" value=""> <div class="form-group">
+        <label for="comment-form-name">Name <span class="required">*</span></label>
+        <input type="text" id="comment-form-name" name="fields[name]" required>
+      </div>
+
+      <div class="form-group">
+        <label for="comment-form-email">Email (will not be published) <span class="required">*</span></label>
+        <input type="email" id="comment-form-email" name="fields[email]" required>
+      </div>
+
+      <div class="form-group">
+        <label for="comment-form-comment">Comment <span class="required">*</span></label>
+        <textarea id="comment-form-comment" name="fields[comment]" rows="5" required></textarea>
+      </div>
+
+      <div id="comment-form-message" style="margin-top: 1em;"></div>
+
+      <button type="submit" class="btn">Submit Comment</button>
+    </form>
+  </section>
+  <p style="text-align: right; font-size: smaller; color: #888;">
+    Page generated: {{ site.time | date: "%Y-%m-%d %H:%M:%S %Z" }}
+  </p>
+
 
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
 </article>
+
+<script>
+  (function () {
+    var form = document.getElementById('comment-form');
+    var message = document.getElementById('comment-form-message');
+    if (!form) return;
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault(); // 阻止默认提交
+
+      message.textContent = 'Submitting...';
+      message.style.color = 'inherit';
+      var formData = new FormData(form);
+      var actionUrl = form.action; // 获取表单的 action URL
+
+      // 确保 action URL 存在
+      if (!actionUrl || actionUrl === 'YOUR_NETLIFY_FUNCTION_URL') {
+          message.textContent = 'Error: Staticman endpoint URL is not configured correctly in the template or _config.yml.';
+          message.style.color = 'red';
+          console.error('Staticman endpoint URL missing or incorrect:', actionUrl);
+          return;
+      }
+
+      fetch(actionUrl, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          message.textContent = 'Thanks! Your comment has been submitted and is awaiting moderation (if enabled) or processing.';
+          message.style.color = 'green';
+          form.reset(); // 清空表单
+          // 可选：几秒后清除消息
+          // setTimeout(() => { message.textContent = ''; }, 5000);
+        } else {
+          console.error('Staticman submission error:', data);
+          message.textContent = 'Error: ' + (data.message || 'Could not submit comment.');
+          message.style.color = 'red';
+        }
+      })
+      .catch(error => {
+        console.error('Network or fetch error:', error);
+        message.textContent = 'Error: Could not connect to the submission server. Please try again later.';
+        message.style.color = 'red';
+      });
+    });
+  })();
+</script>

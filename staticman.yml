@@ -1,31 +1,37 @@
-{% if page.comments %}
-  <h2>Leave a Comment</h2>
-  <form
-    action="https://neon-meerkat-c39acd.netlify.app/.netlify/functions/staticman"
-    method="POST"
-  >
-    <input type="hidden" name="options[slug]" value="{{ page.slug }}">
-    <input
-      type="hidden"
-      name="options[redirect]"
-      value="{{ page.url | absolute_url }}"
-    >
+# staticman.yml (放在项目根目录)
+# 请确保这个文件使用 UTF-8 编码且没有 BOM 头
 
-    <div>
-      <label for="name">Name:</label>
-      <input type="text" id="name" name="name" required>
-    </div>
+# 对所有文章 (_posts/ 下的文件) 的评论进行配置
+post_comments:
+  allowedFields: ["name", "email", "comment", "reply_to"] # 允许的表单字段名
+  branch: master # 确认你的 Git 分支名 (master 或 main)
+  commitMessage: "New comment by {fields.name}"
+  filename: "comment-{@timestamp}" # 评论文件名格式
+  format: "yml" # 评论文件格式
+  # 评论存储路径，确保 _data/comments 目录存在或可被创建
+  path: "_data/comments/{options.slug}"
+  requiredFields: ["name", "email", "comment"] # 必填字段
+  transforms:
+    email: md5 # 将 email 转为 md5 (用于 Gravatar)
 
-    <div>
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email">
-    </div>
+  # --- 可选：反垃圾评论 (需要额外配置 Akismet 环境变量) ---
+  # akismet:
+  #   enabled: true
+  #   author: "name"
+  #   author_email: "email"
+  #   content: "comment"
+  #   site: ${env:AKISMET_SITE}
+  #   api_key: ${env:AKISMET_API_KEY}
 
-    <div>
-      <label for="comment">Comment:</label>
-      <textarea id="comment" name="comment" rows="5" required></textarea>
-    </div>
+  # --- 可选：评论审核 (设置为 true 则需要手动合并 PR) ---
+  # moderation: false
 
-    <button type="submit">Submit Comment</button>
-  </form>
-{% endif %}
+# ===== !! 重要：替换这里的 URL !! =====
+# 将下面的 URL 替换为你 Netlify Functions 页面上显示的 Staticman 函数 Endpoint
+endpoint: "https://neon-meerkat-c39acd.netlify.app/.netlify/functions/staticman"
+
+# ===== 嵌套评论配置 (如果你的模板支持) =====
+staticman_nested_comments:
+  enabled: true
+  parent_id_field: "reply_to" # 表单中隐藏字段 <input type="hidden" name="fields[reply_to]">
+  id_field: "_id" # Staticman 自动生成的唯一 ID
