@@ -124,64 +124,67 @@ layout: base
 
       message.textContent = 'Submitting...';
       message.style.color = 'inherit';
-      var formData = new FormData(form);
+
+      const formData = new FormData(form);
+      const commentData = {};
+      formData.forEach((value, key) => {
+        // Remove "fields[" and "]" from the keys to match your backend expectation
+        const sanitizedKey = key.replace('fields[', '').replace(']', '');
+        commentData[sanitizedKey] = value;
+      });
+
       var actionUrl = form.action; // Get form action URL
 
       // Ensure action URL exists
-      if (!actionUrl || actionUrl === 'YOUR_NETLIFY_FUNCTION_URL' || actionUrl === window.location.href) { // Added check for current page URL
-          message.textContent = 'Error: Staticman endpoint URL is not configured correctly in the template.';
-          message.style.color = 'red';
-          console.error('Staticman endpoint URL missing or incorrect:', actionUrl);
-          return;
+      if (!actionUrl || actionUrl === 'YOUR_NETLIFY_FUNCTION_URL' || actionUrl === window.location.href) {
+        message.textContent = 'Error: Staticman endpoint URL is not configured correctly in the template.';
+        message.style.color = 'red';
+        console.error('Staticman endpoint URL missing or incorrect:', actionUrl);
+        return;
       }
 
       fetch(actionUrl, {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json' // Set Content-Type to application/json
+        },
+        body: JSON.stringify(commentData) // Convert data to JSON string
       })
       .then(response => {
-          // Check if response is JSON, otherwise handle as text
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.indexOf("application/json") !== -1) {
-              return response.json().then(data => ({ ok: response.ok, status: response.status, body: data }));
-          } else {
-              return response.text().then(text => ({ ok: response.ok, status: response.status, body: text }));
-          }
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return response.json().then(data => ({ ok: response.ok, status: response.status, body: data }));
+        } else {
+          return response.text().then(text => ({ ok: response.ok, status: response.status, body: text }));
+        }
       })
       .then(result => {
-          // Check if the HTTP status code indicates success (e.g., 200 OK, 302 Found for redirect)
-          // Staticman v3 often redirects on success (302)
-          if (result.ok || result.status === 302) {
-              // Attempt to parse body if it's JSON-like string
-              let successData = result.body;
-              if (typeof result.body === 'string') {
-                  try { successData = JSON.parse(result.body); } catch (e) { /* Ignore parsing error if it's just text */ }
-              }
-
-              // Check for success flag if body is an object, otherwise assume success on OK/Redirect status
-              if (typeof successData === 'object' && successData !== null && successData.success === false) {
-                  console.error('Staticman submission error:', successData);
-                  message.textContent = 'Error: ' + (successData.message || 'Could not submit comment.');
-                  message.style.color = 'red';
-              } else {
-                   message.textContent = 'Thanks! Your comment has been submitted and is awaiting moderation (if enabled) or processing.';
-                   message.style.color = 'green';
-                   form.reset(); // Clear form
-              }
-          } else {
-              // Handle non-ok responses (e.g., 4xx, 5xx errors)
-              console.error('Staticman submission error:', result.status, result.body);
-              let errorMsg = 'Could not submit comment.';
-              // Try to get a message from the response body
-              if (typeof result.body === 'object' && result.body !== null && result.body.message) {
-                  errorMsg = result.body.message;
-              } else if (typeof result.body === 'string' && result.body.length < 200) { // Show short text errors
-                  errorMsg = result.body;
-              }
-              message.textContent = 'Error (' + result.status + '): ' + errorMsg;
-              message.style.color = 'red';
+        if (result.ok || result.status === 302) {
+          let successData = result.body;
+          if (typeof result.body === 'string') {
+            try { successData = JSON.parse(result.body); } catch (e) { /* Ignore parsing error */ }
           }
 
+          if (typeof successData === 'object' && successData !== null && successData.success === false) {
+            console.error('Staticman submission error:', successData);
+            message.textContent = 'Error: ' + (successData.message || 'Could not submit comment.');
+            message.style.color = 'red';
+          } else {
+            message.textContent = 'Thanks! Your comment has been submitted and is awaiting moderation (if enabled) or processing.';
+            message.style.color = 'green';
+            form.reset(); // Clear form
+          }
+        } else {
+          console.error('Staticman submission error:', result.status, result.body);
+          let errorMsg = 'Could not submit comment.';
+          if (typeof result.body === 'object' && result.body !== null && result.body.message) {
+            errorMsg = result.body.message;
+          } else if (typeof result.body === 'string' && result.body.length < 200) {
+            errorMsg = result.body;
+          }
+          message.textContent = 'Error (' + result.status + '): ' + errorMsg;
+          message.style.color = 'red';
+        }
       })
       .catch(error => {
         console.error('Network or fetch error:', error);
