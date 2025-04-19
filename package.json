@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/amosqiang/amosqiang.github.io#readme",
   "dependencies": {
-    "axios": "^1.8.4"
+    "@octokit/rest": "^21.1.1",
+    "axios": "^1.8.4",
+    "js-yaml": "^4.1.0"
   }
 }

@@ -128,10 +128,20 @@ layout: base
       const formData = new FormData(form);
       const commentData = {};
       formData.forEach((value, key) => {
-        // Remove "fields[" and "]" from the keys to match your backend expectation
         const sanitizedKey = key.replace('fields[', '').replace(']', '');
         commentData[sanitizedKey] = value;
       });
+
+      // 获取 slug
+      const slugElement = form.querySelector('input[name="options[slug]"]');
+      if (slugElement) {
+        commentData.slug = slugElement.value;
+      } else {
+        console.error('Error: Could not find slug input field.');
+        message.textContent = 'Error: Could not submit comment (missing slug).';
+        message.style.color = 'red';
+        return;
+      }
 
       var actionUrl = form.action; // Get form action URL
 
@@ -146,9 +156,9 @@ layout: base
       fetch(actionUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json' // Set Content-Type to application/json
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(commentData) // Convert data to JSON string
+        body: JSON.stringify(commentData) // 确保 commentData 包含 slug
       })
       .then(response => {
         const contentType = response.headers.get("content-type");
