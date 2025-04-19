@@ -1,18 +1,5 @@
 const YAML = require('js-yaml');
 
-let Octokit;
-try {
-  const octokitModule = await import("@octokit/rest");
-  Octokit = octokitModule.Octokit;
-} catch (error) {
-  console.error("Error importing @octokit/rest:", error);
-  return {
-    statusCode: 500,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ error: "Failed to import @octokit/rest" }),
-  };
-}
-
 exports.handler = async function(event, context) {
   let Octokit;
   try {
