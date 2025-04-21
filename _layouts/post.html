@@ -52,35 +52,8 @@ layout: base
   {% endif %}
 
 
-  <p style="text-align: right; font-size: smaller; color: #888;" id="corrected-time-display">
-   {% raw %}
-   <time datetime="{{ page.date | date_to_xmlschema }}" style="display:none;"></time>
-   {% endraw %}
-   Loading time...
- </p>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const displayElement = document.getElementById('corrected-time-display');
-    const timeTag = displayElement.querySelector('time');
-    if (timeTag) {
-      const isoDateString = timeTag.getAttribute('datetime');
-      try {ßß
-        const dateObject = new Date(isoDateString);
-        // Format for Singapore Time
-        const options = {
-          timeZone: 'Asia/Singapore', // Specify Singapore timezone
-          year: 'numeric', month: 'numeric', day: 'numeric',
-          hour: 'numeric', minute: '2-digit', second: '2-digit',
-          timeZoneName: 'shortOffset' // Gets +/-HH:MM like +08:00
-        };
-        const formatter = new Intl.DateTimeFormat('en-SG', options); // Use 'en-SG' locale
-        const sgTimeString = formatter.format(dateObject).replace("GMT", ""); // Remove "GMT" if present for cleaner output like +08:00
-
-        displayElement.textContent = 'Published on: ' + sgTimeString;
-      } catch (e) { /* ... error handling ... */ }
-    }
-  });
-</script>
+  <p style="text-align: right; font-size: smaller; color: #888;">
+  Published on: {{ page.date | date: "%Y-%m-%d %H:%M:%S %z" }}
+  </p>
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
 </article>
