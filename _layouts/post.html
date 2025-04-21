@@ -53,7 +53,7 @@ layout: base
 
 
   <p style="text-align: right; font-size: smaller; color: #888;">
-    Page generated: {{ site.time | date: "%Y-%m-%d %H:%M:%S %Z" }}
+   Published on: {{ page.date | date: "%Y-%m-%d %H:%M" }}
   </p>
 
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
