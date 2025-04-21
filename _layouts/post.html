@@ -53,8 +53,7 @@ layout: base
 
 
   <p style="text-align: right; font-size: smaller; color: #888;">
-  Published on: {{ page.date | date: "%Y-%m-%d %H:%M %z" }}
+  TEST_ISO_OUTPUT: {{ page.date | date_to_xmlschema }}
   </p>
-
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
 </article>
