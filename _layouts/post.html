@@ -31,6 +31,27 @@ layout: base
     {{ content }}
   </div>
 
+  <hr> {% if page.comments != false %} <div class="comments">
+    <h2>Comments</h2> <script src="https://giscus.app/client.js"
+            data-repo="amosqiang/amosqiang.github.io"
+            data-repo-id="R_kgDOJYYdng"
+            data-category="Blog Comments"
+            data-category-id="DIC_kwDOJYYdns4CpTfI"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="bottom"
+            data-theme="light_tritanopia"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    </div>
+  {% endif %}
+
+
   <p style="text-align: right; font-size: smaller; color: #888;">
     Page generated: {{ site.time | date: "%Y-%m-%d %H:%M:%S %Z" }}
   </p>
