@@ -35,3 +35,4 @@ gem "http_parser.rb", "~> 0.6.0", :platforms => [:jruby]
 # add "csv"
 gem 'csv'
 
+gem 'jekyll-seo-tag', '~> 2.8'

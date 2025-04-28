@@ -12,6 +12,7 @@ timezone: America/Anchorage # <--- 添加的阿拉斯加时区
 theme: minima
 plugins:
   - jekyll-feed
+  - jekyll-seo-tag
 
 collections:
   posts:

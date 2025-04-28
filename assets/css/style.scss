@@ -23,6 +23,81 @@ h1, h2, h3, h4, h5, h6 {
   // font-family: 'Noto Serif SC', serif;
 }
 
-// 注意：你需要取消上面 @import 和 font-family 行的注释，
-// 并将 URL 和字体名称替换为你自己在 Google Fonts 上选择的。
-// --- 谷歌字体代码结束 ---
+/* --- 紧凑文章列表样式 (Compact Post List Styles) --- */
+/* --- Add to assets/css/style.scss (after @import "minima";) --- */
+/* --- REMOVE previous .post-grid / .post-card styles --- */
+
+.writing-list {
+  display: grid;
+  /* 两列布局: 标题尽可能宽, 日期自动宽度 */
+  grid-template-columns: 1fr auto;
+  grid-row-gap: 0.4rem;    /* 行间距 */
+  grid-column-gap: 1.5rem; /* 列间距 */
+  margin: 1em 0 2em 0;     /* 列表整体的上下外边距 */
+  padding: 0;              /* 移除可能的默认内边距 */
+  list-style: none;        /* 移除列表符号 */
+}
+
+/* 包含标题链接的 div 样式 */
+.writing-list div {
+  overflow: hidden;        /* 防止长标题溢出 */
+  text-overflow: ellipsis; /* 溢出时显示省略号 */
+  white-space: nowrap;     /* 强制标题在一行显示 */
+}
+
+/* 标题链接样式 */
+.writing-list a {
+  text-decoration: none;   /* 默认无下划线 */
+  color: #111;           /* 链接颜色 */
+  font-weight: 500;      /* 字体重量 */
+}
+.writing-list a:hover {
+  text-decoration: underline; /* 鼠标悬停时加下划线 */
+  color: #007bff;        /* 悬停颜色 */
+}
+
+/* 日期样式 */
+.writing-list time {
+  color: #555;          /* 日期颜色 */
+  font-size: 0.9em;      /* 日期字体大小 */
+  white-space: nowrap;   /* 日期不换行 */
+  text-align: right;     /* 日期右对齐 */
+  font-variant-numeric: tabular-nums; /* 让数字等宽对齐 */
+}
+
+/* 小屏幕下的响应式调整 */
+@media screen and (max-width: 600px) {
+  .writing-list {
+    grid-template-columns: 1fr; /* 变为单列 */
+    grid-row-gap: 0.1rem;     /* 行间距更小 */
+    grid-column-gap: 0;
+  }
+  .writing-list time {
+    font-size: 0.8em;
+    grid-row-start: 2;      /* 让日期显示在标题下方 */
+    text-align: left;       /* 日期左对齐 */
+    padding-left: 0.5em;    /* 日期稍作缩进 */
+    margin-bottom: 0.6em;   /* 日期和下一项标题的间距 */
+  }
+  /* 允许标题在小屏幕上换行 */
+  .writing-list div {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+  }
+}
+// --- 将以下代码添加到 assets/css/style.scss 文件中 ---
+// --- 确保它在 @import "minima"; 之后 ---
+
+// 减小单篇博客文章页面的主标题 (H1) 大小
+.post-title {
+  // 设置一个比默认 h1 更小的字号
+  // Minima 默认值可能在 2em 或 2.25rem 左右，你可以试试 1.8em 或 1.7em
+  font-size: 1.8em; // <--- 调整这个值直到满意为止
+  // 也可以用 rem 或 px 单位，例如: 2rem, 1.75rem, 28px, 30px 等
+
+  // (可选) 调整标题和下方 meta 信息之间的距离
+  // margin-bottom: 0.3em; // 例如，减小下外边距，默认可能是 0.625em
+}
+
+// --- 文章标题调整结束 ---
