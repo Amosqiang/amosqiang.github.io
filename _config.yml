@@ -6,6 +6,7 @@ baseurl: "" # 网站的子路径，例如 /blog
 url: "" # 网站的基础 URL，例如 http://amosqiang.github.io
 twitter_username: amosqiang
 github_username: amosqiang
+timezone: America/Anchorage # <--- 添加的阿拉斯加时区
 
 # 构建设置
 theme: minima
