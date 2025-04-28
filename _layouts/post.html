@@ -27,13 +27,40 @@ layout: base
 
       {% comment %} --- 保留作者信息（如果存在）--- {% endcomment %}
       {%- if page.author -%}
-        {% comment %} 如果日期完全移除，可能需要调整作者前的符号，这里暂时移除 • {% endcomment %}
         {% for author in page.author %}
           <span itemprop="author" itemscope itemtype="http://schema.org/Person">
             <span class="p-author h-card" itemprop="name">{{ author }}</span></span>
           {%- if forloop.last == false %}, {% endif -%}
         {% endfor %}
       {%- endif -%}
+
+      {% comment %} --- 显示分类和标签 --- {% endcomment %}
+      {%- assign has_meta_content = false -%}
+      {%- if page.author %}{%- assign has_meta_content = true -%}{%- endif -%}
+
+      {%- if page.categories.size > 0 -%}
+        {% if has_meta_content %}<br>{% endif %} 
+        <span class="post-categories">
+          Category:
+          {% for category in page.categories %}
+            <a href="{{ '/categories/' | relative_url }}#{{ category | slugify }}">{{ category }}</a>
+            {% unless forloop.last %}, {% endunless %}
+          {% endfor %}
+        </span>
+        {%- assign has_meta_content = true -%}
+      {%- endif -%}
+
+      {%- if page.tags.size > 0 -%}
+         {% if has_meta_content %}<br>{% endif %} 
+        <span class="post-tags">
+          Tags:
+          {% for tag in page.tags %}
+            <a href="{{ '/tags/' | relative_url }}#{{ tag | slugify }}">{{ tag }}</a>
+            {% unless forloop.last %}, {% endunless %}
+          {% endfor %}
+        </span>
+      {%- endif -%}
+      
     </p>
   </header>
 
@@ -41,29 +68,37 @@ layout: base
     {{ content }}
   </div>
 
-  <hr> {% if page.comments != false %} <div class="comments">
-    <h2>Comments</h2> <script src="https://giscus.app/client.js"
-            data-repo="amosqiang/amosqiang.github.io"
-            data-repo-id="R_kgDOJYYdng"
-            data-category="Blog Comments"
-            data-category-id="DIC_kwDOJYYdns4CpTfI"
-            data-mapping="pathname"
-            data-strict="0"
-            data-reactions-enabled="1"
-            data-emit-metadata="0"
-            data-input-position="bottom"
-            data-theme="light_tritanopia"
-            data-lang="en"
-            data-loading="lazy"
-            crossorigin="anonymous"
-            async>
-    </script>
+  <hr> 
+  {% if page.comments != false %} 
+    <div class="comments">
+      <h2>Comments</h2> 
+      <script src="https://giscus.app/client.js"
+              data-repo="amosqiang/amosqiang.github.io"
+              data-repo-id="R_kgDOJYYdng"
+              data-category="Blog Comments"
+              data-category-id="DIC_kwDOJYYdns4CpTfI"
+              data-mapping="pathname"
+              data-strict="0"
+              data-reactions-enabled="1"
+              data-emit-metadata="0"
+              data-input-position="bottom"
+              data-theme="light_tritanopia"
+              data-lang="en"
+              data-loading="lazy"
+              crossorigin="anonymous"
+              async>
+      </script>
     </div>
   {% endif %}
 
+  {% comment %} --- 新增：返回主页链接 --- {% endcomment %}
+  <div class="back-to-home" style="margin-top: 2em; margin-bottom: 1em;">
+    <a href="{{ "/" | relative_url }}" title="返回主页">←</a>
+  </div>
+
   {% comment %} --- 末尾时间戳：保留 --- {% endcomment %}
   <p style="text-align: right; font-size: smaller; color: #888;">
-  Published on: {{ page.date | date: "%Y-%m-%d %H:%M:%S %Z %z" }}
+   Published on: {{ page.date | date: "%Y-%m-%d %H:%M:%S %Z %z" }}
   </p>
 
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
