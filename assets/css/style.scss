@@ -61,7 +61,7 @@
 }
 
 /* 小屏幕下的响应式调整 (使用 768px 断点) */
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 600px) {
   .writing-list {
     grid-template-columns: 1fr; /* 变为单列 */
     grid-row-gap: 0.1rem;     /* 行间距更小 */
