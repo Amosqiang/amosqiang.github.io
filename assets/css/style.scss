@@ -2,3 +2,27 @@
 # Only the main Sass file needs front matter (the dashes are enough)
 ---
 @import "minima";
+// --- 将以下代码添加到 assets/css/style.scss 文件中 ---
+// --- 确保它在 @import "minima"; 之后 ---
+
+// 1. 在这里粘贴从 Google Fonts 获取的 @import URL
+//    注意：这会从 Google 加载字体，确保你的访问者网络可以访问 Google
+//    示例 (请替换为你自己选择的字体URL):
+// @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Noto+Serif+SC:wght@700&display=swap');
+
+// 2. 应用你选择的字体
+// 示例：使用 Noto Sans SC 作为正文字体
+body {
+  // font-family: 'Noto Sans SC', sans-serif;
+  // font-size: 17px;
+  // line-height: 1.7; // 中文字体通常需要更大行高
+}
+
+// 示例：使用 Noto Serif SC 作为标题字体
+h1, h2, h3, h4, h5, h6 {
+  // font-family: 'Noto Serif SC', serif;
+}
+
+// 注意：你需要取消上面 @import 和 font-family 行的注释，
+// 并将 URL 和字体名称替换为你自己在 Google Fonts 上选择的。
+// --- 谷歌字体代码结束 ---
