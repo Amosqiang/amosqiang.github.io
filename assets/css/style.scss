@@ -86,6 +86,26 @@ h1, h2, h3, h4, h5, h6 {
       text-overflow: clip;
   }
 }
+@media screen and (max-width: 768px) { // <-- 把 600px 改成 768px
+  /* ... 内部的 .writing-list, .writing-list time, .writing-list div 规则保持不变 ... */
+  .writing-list {
+    grid-template-columns: 1fr;
+    grid-row-gap: 0.1rem;
+    grid-column-gap: 0;
+  }
+  .writing-list time {
+    font-size: 0.8em;
+    grid-row-start: 2;
+    text-align: left;
+    padding-left: 0.5em;
+    margin-bottom: 0.6em;
+  }
+  .writing-list div {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+  }
+}
 // --- 将以下代码添加到 assets/css/style.scss 文件中 ---
 // --- 确保它在 @import "minima"; 之后 ---
 
