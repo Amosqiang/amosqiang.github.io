@@ -1,7 +1,7 @@
 ---
 layout: page
 #title: All Tags
-permalink: /Tags/
+permalink: /tags/
 ---
 
 {% comment %} H1 标题由 layout: page 自动生成，此处无需重复 {% endcomment %}
