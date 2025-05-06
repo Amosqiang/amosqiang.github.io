@@ -1,2 +1,1 @@
 # amosqiang.github.io
-# ok
