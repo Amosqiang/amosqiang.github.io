@@ -1,109 +1,213 @@
 ---
 # Only the main Sass file needs front matter (the dashes are enough)
 ---
-@import "minima";
+@import "minima"; // 必须在最前面导入基础主题
 
-// --- Google Fonts 示例 (当前未启用) ---
-// 1. @import URL (需要时取消注释并替换)
-// @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Noto+Serif+SC:wght@700&display=swap');
+// --- 全局样式调整 (部分模仿 Tom P-W 风格) ---
+body {
+  line-height: 1.5; 
+}
 
-// 2. 应用字体 (需要时取消注释并修改)
-// body {
-//   font-family: 'Noto Sans SC', sans-serif;
-//   font-size: 17px;
-//   line-height: 1.7;
-// }
-// h1, h2, h3, h4, h5, h6 {
-//   font-family: 'Noto Serif SC', serif;
-// }
-// --- Google Fonts 示例结束 ---
+.wrapper { 
+  max-width: 42em;        /* Tom 博客的内容宽度 */
+  margin-left: auto;   
+  margin-right: auto;  
+  padding-left: 15px;     /* 保留 Minima 的左右内边距 */
+  padding-right: 15px; 
+  text-align: justify;    /* 文本两端对齐 */
+  font-size: 110%;        /* 容器内字体相对于 body 放大 */
+  line-height: 1.5em;     /* 容器内行高 */
+  margin-top: 1.2em;      /* 紧凑的上下外边距 */
+  margin-bottom: 1.2em;   
+}
+
+// 基础链接样式 (模仿 Tom 博客)
+a {
+  color: #00a; // 蓝色链接
+  text-decoration: none; 
+  transition: color 0.2s ease-in-out; // 平滑过渡
+}
+a:hover {
+  color: black; // 悬停变黑
+  text-decoration: underline; 
+}
+a:visited {
+  color: #a0a; // 已访问链接颜色
+}
+
+// 减少页面主要内容区域的上下内边距 (覆盖 Minima)
+main.page-content {
+  padding-top: 0.8em;    /* 减少 Minima 的默认 30px */
+  padding-bottom: 0.8em; /* 减少 Minima 的默认 30px */
+  flex: 1; // 保持 flex 属性 (Minima 用它来处理 sticky footer)
+}
+// --- 全局样式调整结束 ---
 
 
-/* --- 紧凑文章列表样式 (Compact Post List Styles) --- */
+// --- 网站主标题样式 (最终修正版) ---
+a.site-title,
+a.site-title:visited { 
+  color: #a00;        /* 深红色 */
+  font-size: 1.1rem;  /* 调小后的字号 (可调整) */
+  font-weight: bold;  /* 粗体 */
+  text-decoration: none; 
+  line-height: normal; /* 确保行高正常 */
+  flex-shrink: 0; /* 防止标题在 flex 布局中被压缩 */
+}
+a.site-title:hover {
+  color: #111;        /* 鼠标悬停颜色 */
+  text-decoration: none; 
+}
+// --- 网站主标题样式结束 ---
 
+
+// --- 页眉布局和导航链接样式 (使用 Flexbox) ---
+.site-header > .wrapper { // 定位页眉内的 wrapper
+  display: flex;           // 使用 Flexbox 布局
+  align-items: baseline;   // 按文字基线对齐 标题 和 导航
+  justify-content: flex-start; // 从左开始排列
+}
+
+// 重置标题和导航容器的 float 和 line-height
+a.site-title, 
+.site-nav { // 应用于标题和导航容器
+  float: none;      
+  line-height: normal; 
+}
+
+// 导航块的样式
+.site-nav {
+  margin-left: 1.5em;   // 控制导航与标题之间的距离 (可调整)
+  /* 移动端样式通常由 Minima 的 @media 查询处理 */
+}
+
+// 导航链接样式 (模仿 Tom 的 'extra' 链接)
+.site-nav .page-link {
+  color: #aaa;           // 浅灰色
+  font-size: 0.85rem;     // 比正文稍小 (可调整)
+  font-weight: normal;    // 普通字重
+  text-decoration: none;
+  line-height: inherit;   // 继承正常行高
+  padding: 5px 0;         // 微调垂直间距
+
+  &:not(:last-child) { 
+      margin-right: 10px; // 减小链接之间的距离
+  }
+}
+
+.site-nav .page-link:hover {
+  color: black;           // 悬停变黑
+  text-decoration: underline; 
+}
+// --- 页眉布局和导航链接样式结束 ---
+
+
+// --- 调整首页列表上方 H1 标题 ("Blog Posts") 样式 ---
+h1.page-heading { 
+    font-size: 1.2em;     // 标题字号 (相对于 .wrapper)
+    font-weight: bold;    
+    color: #333;          
+    margin-top: 0;        
+    margin-bottom: 0.8em; // 标题下方间距   
+}
+// --- H1 标题样式结束 ---
+
+
+// --- Tom Preston-Werner 风格的文章列表样式 ---
+ul.posts {
+  list-style-type: none;  
+  padding-left: 0;        
+  margin-top: 0;          
+  margin-bottom: 1.5em; // 列表下方间距    
+}
+
+ul.posts li {
+  line-height: 1.5em; // 紧凑行高     
+  margin-bottom: 0;   // 列表项之间无额外间距
+}
+
+span.post-date-tom-style { 
+  display: inline-block; 
+  width: 7.5em; // 日期宽度 (可调整)          
+  margin-right: 0.5em; // 日期与 "»" 间距    
+  color: #aaa;             
+  font-family: Monaco, "Courier New", monospace; // 等宽字体
+  font-size: 75%; // 日期字号 (相对 li)         
+  text-align: right;      
+  vertical-align: baseline; 
+}
+// --- Tom Preston-Werner 风格文章列表样式结束 ---
+
+
+.site-footer {
+  border-top: 4px solid #eee; 
+  padding-top: 0.5em;  /* <-- 大幅减小顶部内边距 (原 1.5em), 可继续微调 */
+  padding-bottom: 1.5em; 
+  padding-left: 0; 
+  padding-right: 0;
+  margin-top: 1.2em; 
+  font-size: 80%; 
+  color: #666; 
+}
+
+/* 页脚内容包裹层 Flexbox 调整 */
+.site-footer .wrapper .footer-content-wrapper {
+  display: flex;                
+  justify-content: flex-start; /* 保持靠左排列 */
+  align-items: baseline;     /* <-- 修改：尝试按基线对齐 */
+  flex-wrap: wrap;              
+}
+
+/* 联系信息区块样式 (移除 float) */
+.site-footer .contact { 
+  margin-bottom: 1em; // 保留底部边距用于换行
+}
+
+/* 联系信息区块内的段落样式 */
+.site-footer .contact p {
+  margin: 0 0 0.5em 0; 
+  line-height: 1.3; // 紧凑行高
+}
+
+/* RSS 区块样式 */
+.site-footer .rss { 
+  margin-top: 0; 
+  margin-left: 3em; /* <-- 新增：添加左外边距来控制与联系信息的距离 (可调整 3em 这个值) */
+}
+
+/* RSS 图片样式 */
+.site-footer .rss img {
+  border: 0;          
+  vertical-align: middle; 
+}
+
+/* 页脚内链接特定样式 */
+.site-footer .contact a { 
+  color: #8085C1;       // Tom 页脚链接颜色
+  text-decoration: none;
+  transition: color 0.2s ease-in-out; 
+}
+.site-footer .contact a:hover {
+  color: black;
+  text-decoration: underline;
+}
+/* --- 页脚样式结束 --- */
+
+
+/* --- 你原始的 .writing-list 样式 (注释掉) --- */
+/*
 .writing-list {
-  display: grid;
-  /* 两列布局: 标题尽可能宽, 日期自动宽度 */
-  grid-template-columns: 1fr auto;
-  grid-row-gap: 0.4rem;    /* 行间距 */
-  grid-column-gap: 1.5rem; /* 列间距 */
-  margin: 1em 0 2em 0;     /* 列表整体的上下外边距 */
-  padding: 0;              /* 移除可能的默认内边距 */
-  list-style: none;        /* 移除列表符号 */
+  // ... (所有 .writing-list 相关规则) ...
 }
-
-/* 包含标题链接的 div 样式 */
-.writing-list div {
-  overflow: hidden;        /* 防止长标题溢出 */
-  text-overflow: ellipsis; /* 溢出时显示省略号 */
-  white-space: nowrap;     /* 强制标题在一行显示 */
-}
-
-/* 标题链接样式 */
-.writing-list a {
-  text-decoration: none;   /* 默认无下划线 */
-  color: #111;            /* 链接颜色 */
-  font-weight: 500;      /* 字体重量 */
-  font-size: 1em;        /* 文章列表标题大小 (根据你的反馈调整) */
-}
-.writing-list a:hover {
-  text-decoration: underline; /* 鼠标悬停时加下划线 */
-  color: #007bff;         /* 悬停颜色 */
-}
-
-/* 日期样式 */
-.writing-list time {
-  color: #555;             /* 日期颜色 */
-  font-size: 0.9em;        /* 日期字体大小 */
-  white-space: nowrap;     /* 日期不换行 */
-  text-align: right;       /* 日期右对齐 */
-  font-variant-numeric: tabular-nums; /* 让数字等宽对齐 */
-}
-
-/* 小屏幕下的响应式调整 (使用 768px 断点) */
 @media screen and (max-width: 375px) {
-  .writing-list {
-    grid-template-columns: 1fr; /* 变为单列 */
-    grid-row-gap: 0.1rem;     /* 行间距更小 */
-    grid-column-gap: 0;
-  }
-  .writing-list time {
-    font-size: 0.8em;
-    grid-row-start: 2;      /* 让日期显示在标题下方 */
-    text-align: left;       /* 日期左对齐 */
-    padding-left: 0.5em;    /* 日期稍作缩进 */
-    margin-bottom: 0.6em;   /* 日期和下一项标题的间距 */
-  }
-  /* 允许标题在小屏幕上换行 */
-  .writing-list div {
-      white-space: normal;
-      overflow: visible;
-      text-overflow: clip;
-  }
+  // ... (响应式规则) ...
 }
-/* --- 紧凑列表样式结束 --- */
+*/
+/* --- End Original .writing-list Styles --- */
 
 
-/* --- 单篇文章标题样式调整 --- */
-// 减小单篇博客文章页面的主标题 (H1) 大小
-.post-title {
-  font-size: 1.8em; // <--- 调整这个值直到满意为止
-  // margin-bottom: 0.3em; // 可选: 调整下外边距
+/* --- 单篇文章标题样式调整 (保留) --- */
+.post-title { // 文章页的 H1
+  font-size: 1.8em; // 保留你原来的设置
 }
 /* --- 文章标题调整结束 --- */
-
-
-/* --- 新增：修改网站主标题样式 --- */
-/* (请确认 .site-title a 是你网站主标题链接的正确 CSS 选择器) */
-.site-title a, 
-.site-title a:visited { /* 同时设置已访问链接的样式 */
-  color: #a00;        /* 修改颜色为深红色 */
-  font-size: 1.1rem;  /* <-- 调小字号 (Minima 默认可能约 1.125rem 或 1.2rem，你可以尝试 1.1rem, 1rem, 1.05rem 等) */
-  /* font-weight: bold; */  /* Minima 可能已有字重设置，如果需要取消粗体可以设为 normal */
-  text-decoration: none; /* 通常主标题没有下划线 */
-}
-.site-title a:hover {
-  color: #111;        /* 鼠标悬停颜色，例如深灰色 */
-  text-decoration: none; /* 悬停时通常也无下划线 */
-}
-/* --- 网站主标题样式修改结束 --- */
