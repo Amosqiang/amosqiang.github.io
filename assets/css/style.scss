@@ -42,21 +42,21 @@
 /* 标题链接样式 */
 .writing-list a {
   text-decoration: none;   /* 默认无下划线 */
-  color: #111;           /* 链接颜色 */
+  color: #111;            /* 链接颜色 */
   font-weight: 500;      /* 字体重量 */
   font-size: 1em;        /* 文章列表标题大小 (根据你的反馈调整) */
 }
 .writing-list a:hover {
   text-decoration: underline; /* 鼠标悬停时加下划线 */
-  color: #007bff;        /* 悬停颜色 */
+  color: #007bff;         /* 悬停颜色 */
 }
 
 /* 日期样式 */
 .writing-list time {
-  color: #555;          /* 日期颜色 */
-  font-size: 0.9em;      /* 日期字体大小 */
-  white-space: nowrap;   /* 日期不换行 */
-  text-align: right;     /* 日期右对齐 */
+  color: #555;             /* 日期颜色 */
+  font-size: 0.9em;        /* 日期字体大小 */
+  white-space: nowrap;     /* 日期不换行 */
+  text-align: right;       /* 日期右对齐 */
   font-variant-numeric: tabular-nums; /* 让数字等宽对齐 */
 }
 
@@ -91,3 +91,19 @@
   // margin-bottom: 0.3em; // 可选: 调整下外边距
 }
 /* --- 文章标题调整结束 --- */
+
+
+/* --- 新增：修改网站主标题样式 --- */
+/* (请确认 .site-title a 是你网站主标题链接的正确 CSS 选择器) */
+.site-title a, 
+.site-title a:visited { /* 同时设置已访问链接的样式 */
+  color: #a00;        /* 修改颜色为深红色 */
+  font-size: 1.1rem;  /* <-- 调小字号 (Minima 默认可能约 1.125rem 或 1.2rem，你可以尝试 1.1rem, 1rem, 1.05rem 等) */
+  /* font-weight: bold; */  /* Minima 可能已有字重设置，如果需要取消粗体可以设为 normal */
+  text-decoration: none; /* 通常主标题没有下划线 */
+}
+.site-title a:hover {
+  color: #111;        /* 鼠标悬停颜色，例如深灰色 */
+  text-decoration: none; /* 悬停时通常也无下划线 */
+}
+/* --- 网站主标题样式修改结束 --- */
