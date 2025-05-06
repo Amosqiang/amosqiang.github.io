@@ -2,13 +2,13 @@
 layout: default
 # title: Home 
 ---
-
+{% comment %} 123 {% endcomment %}
 <h1 class="page-heading">Blog Posts</h1> 
 
 {%- if site.posts.size > 0 -%}
-  <ul class="posts"> 
+  <ul class="posts">
     {%- for post in site.posts limit: 15 -%}
-    <li> 
+    <li>
       <span class="post-date-tom-style">{{ post.date | date: "%d %b %Y" }}</span> 
       &raquo; 
       <a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
