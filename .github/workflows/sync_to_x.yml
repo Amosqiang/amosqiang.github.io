@@ -39,15 +39,13 @@ jobs:
       - name: Download last state artifact
         uses: dawidd6/action-download-artifact@v3
         with:
-          # 从名为 ARTIFACT_NAME 的 Artifact 下载
           name: ${{ env.ARTIFACT_NAME }}
-          # 下载到当前目录 (脚本将能读取到 STATE_FILE_PATH)
           path: ./ 
-          # 从本工作流上次成功的运行中查找 Artifact
           workflow: ${{ github.workflow }} 
           workflow_conclusion: success
-        # 如果找不到 Artifact (例如首次运行)，不报错继续执行
-        continue-on-error: true 
+          # 新增：明确指定分支
+          branch: main # 或者 ${{ github.ref_name }} 
+        continue-on-error: true
 
       # 步骤 5: (可选) 等待 Feed 更新
       - name: Wait for feed propagation (optional)
