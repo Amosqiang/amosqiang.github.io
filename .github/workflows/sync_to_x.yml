@@ -41,16 +41,16 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       
-      # 步骤 4: 下载上次的状态文件 Artifact (如果存在)
+# 步骤 4: 下载上次的状态文件 Artifact (如果存在)
       - name: Download last state artifact
         uses: dawidd6/action-download-artifact@v3
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ./ 
-          workflow: ${{ github.workflow }} 
+          # 修改这里：使用 workflow 的 name 而不是 ID
+          workflow: 'Sync Blog Posts to X' # <-- 使用 YAML 文件顶部的 name 值
           workflow_conclusion: success
-          # 新增：明确指定分支
-          branch: main # 或者 ${{ github.ref_name }} 
+          branch: main 
         continue-on-error: true
 
       # 步骤 5: (可选) 等待 Feed 更新
