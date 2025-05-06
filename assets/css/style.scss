@@ -3,211 +3,115 @@
 ---
 @import "minima"; // 必须在最前面导入基础主题
 
-// --- 全局样式调整 (部分模仿 Tom P-W 风格) ---
-body {
-  line-height: 1.5; 
-}
-
+// --- 全局样式调整 ---
+body { line-height: 1.5; }
 .wrapper { 
-  max-width: 42em;        /* Tom 博客的内容宽度 */
-  margin-left: auto;   
-  margin-right: auto;  
-  padding-left: 15px;     /* 保留 Minima 的左右内边距 */
-  padding-right: 15px; 
-  text-align: justify;    /* 文本两端对齐 */
-  font-size: 110%;        /* 容器内字体相对于 body 放大 */
-  line-height: 1.5em;     /* 容器内行高 */
-  margin-top: 1.2em;      /* 紧凑的上下外边距 */
-  margin-bottom: 1.2em;   
+  max-width: 42em; margin-left: auto; margin-right: auto;  
+  padding-left: 15px; padding-right: 15px; text-align: justify;    
+  font-size: 110%; line-height: 1.5em; margin-top: 1.2em; margin-bottom: 1.2em;   
 }
-
-// 基础链接样式 (模仿 Tom 博客)
-a {
-  color: #00a; // 蓝色链接
-  text-decoration: none; 
-  transition: color 0.2s ease-in-out; // 平滑过渡
-}
-a:hover {
-  color: black; // 悬停变黑
-  text-decoration: underline; 
-}
-a:visited {
-  color: #a0a; // 已访问链接颜色
-}
-
-// 减少页面主要内容区域的上下内边距 (覆盖 Minima)
-main.page-content {
-  padding-top: 0.8em;    /* 减少 Minima 的默认 30px */
-  padding-bottom: 0.8em; /* 减少 Minima 的默认 30px */
-  flex: 1; // 保持 flex 属性 (Minima 用它来处理 sticky footer)
-}
+a { color: #00a; text-decoration: none; transition: color 0.2s ease-in-out; }
+a:hover { color: black; text-decoration: underline; }
+a:visited { color: #a0a; }
+main.page-content { padding-top: 0.8em; padding-bottom: 0.8em; flex: 1; }
 // --- 全局样式调整结束 ---
 
-
-// --- 网站主标题样式 (最终修正版) ---
-a.site-title,
-a.site-title:visited { 
-  color: #a00;        /* 深红色 */
-  font-size: 1.1rem;  /* 调小后的字号 (可调整) */
-  font-weight: bold;  /* 粗体 */
-  text-decoration: none; 
-  line-height: normal; /* 确保行高正常 */
-  flex-shrink: 0; /* 防止标题在 flex 布局中被压缩 */
+// --- 网站主标题样式 ---
+a.site-title, a.site-title:visited { 
+  color: #a00; font-size: 1.1rem; font-weight: bold; text-decoration: none; 
+  line-height: normal; flex-shrink: 0; 
 }
-a.site-title:hover {
-  color: #111;        /* 鼠标悬停颜色 */
-  text-decoration: none; 
-}
+a.site-title:hover { color: #111; text-decoration: none; }
 // --- 网站主标题样式结束 ---
 
-
-// --- 页眉布局和导航链接样式 (使用 Flexbox) ---
-.site-header > .wrapper { // 定位页眉内的 wrapper
-  display: flex;           // 使用 Flexbox 布局
-  align-items: baseline;   // 按文字基线对齐 标题 和 导航
-  justify-content: flex-start; // 从左开始排列
-}
-
-// 重置标题和导航容器的 float 和 line-height
-a.site-title, 
-.site-nav { // 应用于标题和导航容器
-  float: none;      
-  line-height: normal; 
-}
-
-// 导航块的样式
-.site-nav {
-  margin-left: 1.5em;   // 控制导航与标题之间的距离 (可调整)
-  /* 移动端样式通常由 Minima 的 @media 查询处理 */
-}
-
-// 导航链接样式 (模仿 Tom 的 'extra' 链接)
+// --- 页眉布局和导航链接样式 ---
+.site-header > .wrapper { display: flex; align-items: baseline; justify-content: flex-start; }
+a.site-title, .site-nav { float: none; line-height: normal; }
+.site-nav { margin-left: 1.5em; }
 .site-nav .page-link {
-  color: #aaa;           // 浅灰色
-  font-size: 0.85rem;     // 比正文稍小 (可调整)
-  font-weight: normal;    // 普通字重
-  text-decoration: none;
-  line-height: inherit;   // 继承正常行高
-  padding: 5px 0;         // 微调垂直间距
-
-  &:not(:last-child) { 
-      margin-right: 10px; // 减小链接之间的距离
-  }
+  color: #aaa; font-size: 0.85rem; font-weight: normal; text-decoration: none;
+  line-height: inherit; padding: 5px 0;         
+  &:not(:last-child) { margin-right: 10px; }
 }
-
-.site-nav .page-link:hover {
-  color: black;           // 悬停变黑
-  text-decoration: underline; 
-}
+.site-nav .page-link:hover { color: black; text-decoration: underline; }
 // --- 页眉布局和导航链接样式结束 ---
 
-
-// --- 调整首页列表上方 H1 标题 ("Blog Posts") 样式 ---
+// --- 首页列表上方 H1 标题 ---
 h1.page-heading { 
-    font-size: 1.2em;     // 标题字号 (相对于 .wrapper)
-    font-weight: bold;    
-    color: #333;          
-    margin-top: 0;        
-    margin-bottom: 0.8em; // 标题下方间距   
+  font-size: 1.2em; font-weight: bold; color: #333;          
+  margin-top: 0; margin-bottom: 0.8em;   
 }
 // --- H1 标题样式结束 ---
 
 
-// --- Tom Preston-Werner 风格的文章列表样式 ---
-ul.posts {
+/* --- 文章列表样式 (悬挂缩进 - 绝对定位法) --- */
+/* !!! 请删除或注释掉之前所有关于 ul.posts-grid, li.post-item-grid 等 Grid 布局的规则 !!! */
+
+ul.posts { /* 对应 HTML 中的 <ul class="posts"> */
   list-style-type: none;  
-  padding-left: 0;        
   margin-top: 0;          
-  margin-bottom: 1.5em; // 列表下方间距    
+  margin-bottom: 1.5em;     
+  padding-left: 9em;  /* <-- **重要**: 为日期腾出空间 (可调整) */
+  margin-left: 0;       /* 覆盖可能的默认 ul 外边距 */  
 }
 
-ul.posts li {
-  line-height: 1.5em; // 紧凑行高     
-  margin-bottom: 0;   // 列表项之间无额外间距
+ul.posts li { /* 对应 HTML 中的 <li> */
+  position: relative;     /* <-- **重要**: 为日期绝对定位提供参照 */
+  margin-bottom: 0.3em;   /* <-- 列表项之间的间距，调小使其紧凑 (可调整) */
+  padding-left: 0;        /* 确保 li 自身没有内边距干扰 */
+  line-height: 1.5;       /* 基础行高 (可调整) */
 }
 
-span.post-date-tom-style { 
-  display: inline-block; 
-  width: 7.5em; // 日期宽度 (可调整)          
-  margin-right: 0.5em; // 日期与 "»" 间距    
+span.post-date-tom-style { /* 对应 HTML 中的 <span class="post-date-tom-style"> */
+  position: absolute;     /* <-- **重要**: 绝对定位 */
+  left: -9em;             /* <-- **重要**: 向左移动 (等于 ul 的 padding-left 负值) */
+  top: 0;                 /* <-- 与 li 顶部对齐 */
+  width: 7.5em;           /* <-- 日期宽度 (可调整) */
+  display: inline-block;  /* 让宽度生效 */
+  margin-right: 0;        /* 绝对定位后不再需要右边距 */
   color: #aaa;             
-  font-family: Monaco, "Courier New", monospace; // 等宽字体
-  font-size: 75%; // 日期字号 (相对 li)         
-  text-align: right;      
-  vertical-align: baseline; 
+  font-family: Monaco, "Courier New", monospace; /* 等宽字体 */
+  font-size: 75%;         /* 日期字号 */
+  text-align: right;      /* 日期右对齐 */
+  line-height: inherit;   /* <-- **重要**: 继承 li 行高，帮助垂直对齐 */
 }
-// --- Tom Preston-Werner 风格文章列表样式结束 ---
+
+/* 列表项中的分隔符和链接 a 标签会自然地从 li 的内容区 (padding 左侧) 开始排列 */
+ul.posts li a {
+  /* 继承全局 'a' 样式 */
+}
+/* --- 文章列表样式结束 --- */
 
 
+/* --- 页脚样式 (Flexbox 布局 和 span 结构) --- */
 .site-footer {
-  border-top: 4px solid #eee; 
-  padding-top: 0.5em;  /* <-- 大幅减小顶部内边距 (原 1.5em), 可继续微调 */
-  padding-bottom: 1.5em; 
-  padding-left: 0; 
-  padding-right: 0;
-  margin-top: 1.2em; 
-  font-size: 80%; 
-  color: #666; 
+  border-top: 4px solid #eee; padding-top: 0.3em; padding-bottom: 1.5em; 
+  padding-left: 0; padding-right: 0; margin-top: 1.2em; 
+  font-size: 80%; color: #666; 
 }
-
-/* 页脚内容包裹层 Flexbox 调整 */
 .site-footer .wrapper .footer-content-wrapper {
-  display: flex;                
-  justify-content: flex-start; /* 保持靠左排列 */
-  align-items: baseline;     /* <-- 修改：尝试按基线对齐 */
-  flex-wrap: wrap;              
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;              
 }
-
-/* 联系信息区块样式 (移除 float) */
 .site-footer .contact { 
-  margin-bottom: 1em; // 保留底部边距用于换行
+  display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 0;         
 }
-
-/* 联系信息区块内的段落样式 */
-.site-footer .contact p {
-  margin: 0 0 0.5em 0; 
-  line-height: 1.3; // 紧凑行高
-}
-
-/* RSS 区块样式 */
-.site-footer .rss { 
-  margin-top: 0; 
-  margin-left: 3em; /* <-- 新增：添加左外边距来控制与联系信息的距离 (可调整 3em 这个值) */
-}
-
-/* RSS 图片样式 */
-.site-footer .rss img {
-  border: 0;          
-  vertical-align: middle; 
-}
-
-/* 页脚内链接特定样式 */
-.site-footer .contact a { 
-  color: #8085C1;       // Tom 页脚链接颜色
-  text-decoration: none;
-  transition: color 0.2s ease-in-out; 
-}
-.site-footer .contact a:hover {
-  color: black;
-  text-decoration: underline;
-}
+.footer-contact-item { display: block; margin-bottom: 0.3em; line-height: 1.3; }
+.site-footer .rss { margin-top: 0; }
+.site-footer .contact a { color: #8085C1; text-decoration: none; transition: color 0.2s ease-in-out; }
+.site-footer .contact a:hover { color: black; text-decoration: underline; }
+.site-footer .rss .svg-icon { fill: #666; width: 20px; height: 20px; padding-right: 0; vertical-align: middle; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 /* --- 页脚样式结束 --- */
 
 
 /* --- 你原始的 .writing-list 样式 (注释掉) --- */
 /*
-.writing-list {
-  // ... (所有 .writing-list 相关规则) ...
-}
-@media screen and (max-width: 375px) {
-  // ... (响应式规则) ...
-}
+.writing-list { ... }
+@media screen and (max-width: 375px) { ... }
 */
 /* --- End Original .writing-list Styles --- */
 
 
 /* --- 单篇文章标题样式调整 (保留) --- */
-.post-title { // 文章页的 H1
-  font-size: 1.8em; // 保留你原来的设置
-}
+.post-title { font-size: 1.8em; }
 /* --- 文章标题调整结束 --- */
