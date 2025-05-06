@@ -1,0 +1,68 @@
+# .github/workflows/sync_to_x.yml
+name: Sync Blog Posts to X
+
+on:
+  # 允许手动从 GitHub Actions 页面触发
+  workflow_dispatch: 
+
+  # 定时触发 (使用 CRON 语法 - 时间为 UTC)
+  schedule:
+    # 当前设置为每天 UTC 时间 02:00 运行
+    # 这对应的是台湾时间 (CST, UTC+8) 的上午 10:00
+    # 你可以根据需要调整: '分钟 小时 日 月 周'
+    - cron: '0 2 * * *' 
+
+jobs:
+  sync:
+    # 指定运行环境
+    runs-on: ubuntu-latest 
+
+    # 定义环境变量，方便在步骤中引用
+    env:
+      PYTHON_VERSION: '3.9' # 指定 Python 版本
+      STATE_FILE_PATH: './last_post_guid.txt' # 状态文件路径
+      RSS_FEED_URL: 'https://amosqiang.github.io/feed.xml' # 你的 RSS Feed 地址
+
+    steps:
+      # 步骤 1: 签出代码库
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 步骤 2: 设置 Python 环境
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip' # 缓存 pip 下载的包
+
+      # 步骤 3: 安装依赖库
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # 步骤 4: 缓存状态文件 (尝试恢复上次运行保存的状态文件)
+      - name: Cache state file
+        id: cache-state
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STATE_FILE_PATH }} # 缓存/恢复这个文件
+          # key 设计为简单固定，以便在不同运行间共享同一个缓存
+          key: ${{ runner.os }}-last-post-guid 
+
+      # 步骤 5: 运行同步脚本
+      - name: Run sync script
+        env:
+          # 传递 X API Secrets (从 GitHub Secrets 读取)
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          # 传递配置 (从上面定义的 job env 读取)
+          RSS_FEED_URL: ${{ env.RSS_FEED_URL }}
+          STATE_FILE_PATH: ${{ env.STATE_FILE_PATH }}
+        # 执行你的 Python 脚本
+        run: python sync_to_x.py 
+
+      # actions/cache@v4 会在作业结束时自动尝试保存更新后的 STATE_FILE_PATH 文件
+      # 无需显式保存步骤，但如果脚本失败，可能不会保存
