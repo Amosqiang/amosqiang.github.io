@@ -2,62 +2,61 @@
 name: Sync Blog Posts to X
 
 on:
-  # 保留手动触发选项，方便测试
   workflow_dispatch: 
-
-  # 在指定的工作流成功完成后触发
   workflow_run:
-    # 重要：将下面的名称替换为你的 GitHub Pages 部署工作流的准确名称！
     workflows: ["pages-build-deployment"] 
-    types:
-      - completed # 只在被监控的工作流“完成”时触发
-    # 可选：如果你的 Pages 部署工作流可能在非 main 分支运行，
-    # 但你只想在 main 分支部署成功后才同步，可以加上 branches 限制
-    # branches:
-    #  - main 
+    types: [completed]
 
 jobs:
   sync:
-    # 重要：添加这个 if 条件，确保只在 Pages 部署成功时才运行此作业
     if: ${{ github.event.workflow_run.conclusion == 'success' }} 
-
-    # （runs-on 和 job env 部分保持不变）
     runs-on: ubuntu-latest
     env:
-      PYTHON_VERSION: '3.9' 
-      STATE_FILE_PATH: './last_post_guid.txt' 
+      PYTHON_VERSION: '3.9'
+      STATE_FILE_PATH: './last_post_guid.txt' # 脚本读写状态文件的路径
+      ARTIFACT_NAME: 'last-post-state'      # 用于存储状态文件的 Artifact 名称
       RSS_FEED_URL: 'https://amosqiang.github.io/feed.xml'
 
     steps:
-      # （Checkout, Set up Python, Install dependencies, Cache state file 步骤保持不变）
+      # 步骤 1: 签出代码库
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 步骤 2: 设置 Python 环境
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: 'pip' # 保留 pip 的缓存
 
+      # 步骤 3: 安装依赖库
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Cache state file
-        id: cache-state
-        uses: actions/cache@v4
+      
+      # 步骤 4: 下载上次的状态文件 Artifact (如果存在)
+      - name: Download last state artifact
+        uses: dawidd6/action-download-artifact@v3
         with:
-          path: ${{ env.STATE_FILE_PATH }}
-          key: ${{ runner.os }}-last-post-guid
+          # 从名为 ARTIFACT_NAME 的 Artifact 下载
+          name: ${{ env.ARTIFACT_NAME }}
+          # 下载到当前目录 (脚本将能读取到 STATE_FILE_PATH)
+          path: ./ 
+          # 从本工作流上次成功的运行中查找 Artifact
+          workflow: ${{ github.workflow }} 
+          workflow_conclusion: success
+        # 如果找不到 Artifact (例如首次运行)，不报错继续执行
+        continue-on-error: true 
 
-      # 可选：等待一小段时间，确保 feed.xml 完全更新
+      # 步骤 5: (可选) 等待 Feed 更新
       - name: Wait for feed propagation (optional)
-        run: sleep 15s # 等待 15 秒
+        run: sleep 15s 
         shell: bash
 
-      # 运行同步脚本 (env 和 run 部分保持不变)
+      # 步骤 6: 运行同步脚本
       - name: Run sync script
+        id: sync_script # 给步骤一个 ID，方便后续引用其状态
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
@@ -65,6 +64,20 @@ jobs:
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
           RSS_FEED_URL: ${{ env.RSS_FEED_URL }}
           STATE_FILE_PATH: ${{ env.STATE_FILE_PATH }}
-          # 如果你需要从脚本中读取 REQUIRED_TAG，也在这里用 secrets 或 env 传递
-          # REQUIRED_TAG: "X" # 或者 ${{ secrets.REQUIRED_TAG }}
-        run: python sync_to_x.py
+          REQUIRED_TAG: "X" # 确保标签正确，或从 env/secrets 读取
+        run: python sync_to_x.py 
+
+      # 步骤 7: 上传当前的状态文件 Artifact (如果脚本成功执行)
+      - name: Upload current state artifact
+        # 仅当 sync_script 步骤本身成功完成时 (不一定意味着推文发送成功)
+        if: steps.sync_script.outcome == 'success' 
+        uses: actions/upload-artifact@v4
+        with:
+          # 上传名为 ARTIFACT_NAME 的 Artifact
+          name: ${{ env.ARTIFACT_NAME }}
+          # 上传 STATE_FILE_PATH 指定的文件
+          path: ${{ env.STATE_FILE_PATH }} 
+          # 如果文件不存在 (例如脚本出错没生成)，则忽略
+          if-no-files-found: ignore 
+          # 设置 Artifact 的保留天数 (可选, 默认90天)
+          # retention-days: 7

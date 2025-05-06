@@ -12,7 +12,7 @@ ACCESS_TOKEN_SECRET = os.environ.get("X_ACCESS_TOKEN_SECRET")
 
 RSS_FEED_URL = os.environ.get("RSS_FEED_URL", "https://amosqiang.github.io/feed.xml") 
 STATE_FILE_PATH = os.environ.get("STATE_FILE_PATH", "last_post_guid.txt") 
-REQUIRED_TAG = "X" # <--- 确保这里是你想要的标签名
+REQUIRED_TAG = os.environ.get("REQUIRED_TAG", "X") # 从环境变量读取标签，默认为 "X"
 
 # --- 函数 ---
 def get_last_posted_guid(file_path):
@@ -20,17 +20,29 @@ def get_last_posted_guid(file_path):
         with open(file_path, 'r') as f:
             return f.read().strip()
     except FileNotFoundError:
+        print("State file not found, assuming first run or missing artifact.")
         return None
+    except Exception as e:
+        print(f"Error reading state file {file_path}: {e}")
+        return None # Treat as first run on error
 
 def update_last_posted_guid(file_path, guid):
-    with open(file_path, 'w') as f:
-        f.write(guid)
-    print(f"Updated state file with GUID: {guid}")
+    try:
+        with open(file_path, 'w') as f:
+            f.write(guid)
+        print(f"Updated state file with GUID: {guid}")
+        return True
+    except Exception as e:
+        print(f"Error writing state file {file_path}: {e}")
+        return False
+
 
 def post_tweet(text):
+    """使用 Tweepy V2 API 发布推文，处理重复错误"""
     if not all([API_KEY, API_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET]):
         print("Error: Missing API credentials in environment variables.")
-        return False
+        return "error" # 返回错误标识
+    
     try:
         client = tweepy.Client(
             consumer_key=API_KEY, consumer_secret=API_SECRET,
@@ -38,16 +50,19 @@ def post_tweet(text):
         )
         response = client.create_tweet(text=text)
         print(f"Tweet posted successfully! Tweet ID: {response.data['id']}")
-        return True
+        return "success" # 返回成功标识
     except tweepy.errors.TweepyException as e:
         print(f"Error posting tweet: {e}")
-        if isinstance(e, tweepy.errors.Forbidden) and 'duplicate' in str(e).lower():
-             print("Detected duplicate tweet. Skipping.")
-             return False 
-        return False
+        # 特别检查 403 Forbidden 且是内容重复错误
+        if isinstance(e, tweepy.errors.Forbidden) and 'duplicate content' in str(e).lower():
+             print("Detected duplicate tweet via 403 Forbidden.")
+             return "duplicate" # 返回重复标识
+        # 可以添加对其他特定错误的处理，例如速率限制 (429)
+        # elif isinstance(e, tweepy.errors.TooManyRequests): return "ratelimit"
+        return "error" # 返回通用错误标识
     except Exception as e:
         print(f"An unexpected error occurred during tweeting: {e}")
-        return False
+        return "error" # 返回通用错误标识
 
 # --- 主逻辑 ---
 print("Starting blog sync process...")
@@ -61,71 +76,64 @@ feed = feedparser.parse(RSS_FEED_URL)
 
 if feed.bozo:
     print(f"Error parsing RSS feed: {feed.bozo_exception}")
-    exit(1)
+    exit(1) # 应该退出，避免上传错误的状态
 if not feed.entries:
     print("No entries found in the RSS feed.")
-    exit(0)
-    
-# --- 修订后的逻辑 ---
-newest_guid_in_this_run = feed.entries[0].get('guid', feed.entries[0].get('link')) # 记录 Feed 中最新的 GUID
-posts_to_tweet = [] # 存储待发布的文章信息
-found_last_posted_marker = False # 标记是否已找到上次发布的文章
+    exit(0) # 正常退出
 
-for entry in feed.entries: # 遍历 Feed (通常从新到旧)
+# --- 修订后的逻辑 ---
+newest_guid_in_this_run = feed.entries[0].get('guid', feed.entries[0].get('link')) 
+posts_to_tweet = [] 
+found_last_posted_marker = False 
+
+for entry in feed.entries: 
     entry_guid = entry.get('guid', entry.get('link'))
     entry_title = entry.title
     entry_link = entry.link
 
-    # 如果当前条目就是上次发布的条目，停止处理更旧的条目
     if entry_guid == last_posted_guid:
         print(f"Found the last posted entry GUID ({last_posted_guid}). Processing stops here.")
         found_last_posted_marker = True
-        break # 找到了标记，停止循环
+        break 
 
-    # 只处理在找到标记之前的条目（即 Feed 中更新的条目）
-    # 检查这些更新的条目是否包含所需标签
     has_required_tag = False
     if hasattr(entry, 'tags') and isinstance(entry.tags, list):
         for tag_info in entry.tags:
             if hasattr(tag_info, 'term') and tag_info.term.lower() == REQUIRED_TAG.lower():
                 has_required_tag = True
-                break # 找到标签即可
+                break 
 
     if has_required_tag:
-        # 如果条目是新的（在标记之前找到）并且有标签，则加入待发布列表
         print(f"Found potential new post with required tag: '{entry_title}'")
         posts_to_tweet.append({'guid': entry_guid, 'title': entry_title, 'link': entry_link})
     else:
-        # 即使是新的，如果没有标签也跳过
          print(f"Skipping entry '{entry_title}' (either older or lacks required tag).")
 
 # --- 处理首次运行或状态丢失的情况 ---
+latest_guid_to_save = None # 用于记录首次运行时应该保存的 GUID
 if last_posted_guid is None:
     print("First run (or state lost). Processing potentially found posts.")
     if posts_to_tweet:
-        # 如果首次运行找到了带标签的文章，只发布最新的一篇
         print(f"First run: Selecting only the newest post with tag from the initial list.")
-        newest_tagged_post = posts_to_tweet[0] # 列表目前是新的在前
-        posts_to_tweet = [newest_tagged_post] # 只保留最新的一篇
+        newest_tagged_post = posts_to_tweet[0] 
+        posts_to_tweet = [newest_tagged_post] 
+        latest_guid_to_save = newest_tagged_post['guid'] # 标记首次运行时要保存的GUID
     else:
-        # 如果首次运行没找到带标签的文章
         print(f"First run, but no posts found with the required tag '{REQUIRED_TAG}'.")
-        # 更新状态到 Feed 中最新的文章 GUID，避免下次重复检查所有文章
         if newest_guid_in_this_run:
-             print("Updating state to newest overall post GUID found in feed to prevent re-checking.")
-             update_last_posted_guid(STATE_FILE_PATH, newest_guid_in_this_run)
+             latest_guid_to_save = newest_guid_in_this_run # 标记要保存最新文章的GUID
+             print(f"Will update state to newest overall post GUID found in feed ({latest_guid_to_save}) after run.")
 
 # --- 发布推文 ---
+final_state_updated = False # 标记状态文件是否在此次运行中被更新
 if posts_to_tweet:
     print(f"Found {len(posts_to_tweet)} new post(s) with tag '{REQUIRED_TAG}' to tweet.")
-    # 按时间顺序发布（先发布旧的）
     for post_data in reversed(posts_to_tweet): 
         guid = post_data['guid']
         title = post_data['title']
         link = post_data['link']
         
         tweet_text = f"{title} {link}" 
-        # 检查长度
         if len(tweet_text) > 280:
             available_len = 280 - len(f"... {link}") 
             if available_len > 0:
@@ -136,16 +144,42 @@ if posts_to_tweet:
 
         print(f"Attempting to post: {tweet_text}")
         time.sleep(5) 
-        if post_tweet(tweet_text):
-             # 每次成功发布后更新状态文件
-             update_last_posted_guid(STATE_FILE_PATH, guid) 
-             time.sleep(10) 
-        else:
-             print(f"Failed to post tweet for {title}. Stopping further posts in this run.")
-             break # 如果中途失败，状态停留在上一个成功的 GUID
+        
+        post_result = post_tweet(tweet_text) 
+        
+        if post_result == "success" or post_result == "duplicate":
+             # 如果成功 或 检测到是重复帖子，都更新状态文件
+             if post_result == "duplicate":
+                 print("Duplicate tweet detected by API. Updating state file as if successful.")
+             
+             if update_last_posted_guid(STATE_FILE_PATH, guid):
+                 final_state_updated = True # 标记状态已更新
+             else:
+                 print("Error updating state file! Further tweets might be duplicated.")
+                 # 即使状态文件写入失败，也可能需要停止，取决于策略
+                 # break 
+             
+             # 如果只是检查到重复，可能不需要等那么久
+             wait_time = 5 if post_result == "duplicate" else 10
+             print(f"Waiting {wait_time} seconds...")
+             time.sleep(wait_time) 
+        
+        elif post_result == "error": 
+             print(f"Failed to post tweet for {title} due to API or other error. Stopping further posts in this run.")
+             break # 遇到非重复错误，停止发布循环
+
 else:
-    # 只有在非首次运行且确实没找到新帖子时才打印这条
     if last_posted_guid is not None:
          print(f"No new posts found with tag '{REQUIRED_TAG}' since the last run.")
 
+# 如果是首次运行且未找到可发布的帖子，但我们标记了要保存最新GUID
+if not final_state_updated and last_posted_guid is None and latest_guid_to_save:
+     print(f"Performing state update for first run (no tweets sent).")
+     update_last_posted_guid(STATE_FILE_PATH, latest_guid_to_save)
+
 print("Blog sync process finished.")
+
+# 确保脚本最后有一个明确的退出码 (0表示成功)
+# 如果在任何地方调用了 exit(1)，则工作流步骤会失败
+# 这里我们假设如果脚本能运行到最后就是成功 (即使中间有推文失败但被处理了)
+exit(0)
