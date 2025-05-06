@@ -110,18 +110,20 @@ for entry in feed.entries:
          print(f"Skipping entry '{entry_title}' (either older or lacks required tag).")
 
 # --- 处理首次运行或状态丢失的情况 ---
-latest_guid_to_save = None # 用于记录首次运行时应该保存的 GUID
+latest_guid_to_save = None 
 if last_posted_guid is None:
     print("First run (or state lost). Processing potentially found posts.")
-    if posts_to_tweet:
-        print(f"First run: Selecting only the newest post with tag from the initial list.")
-        newest_tagged_post = posts_to_tweet[0] 
-        posts_to_tweet = [newest_tagged_post] 
-        latest_guid_to_save = newest_tagged_post['guid'] # 标记首次运行时要保存的GUID
+    if posts_to_tweet: # posts_to_tweet 列表是按 Feed 中从新到旧顺序添加的
+        # 从找到的带标签的潜在新帖子中，选出真正最新(列表第一个)的那个
+        newest_tagged_post_data = posts_to_tweet[0] 
+        print(f"First run: Selecting only the newest post with tag: '{newest_tagged_post_data['title']}'")
+        posts_to_tweet = [newest_tagged_post_data] # 更新列表，只保留这一篇用于发布
+        latest_guid_to_save = newest_tagged_post_data['guid'] # 标记这篇的 GUID 为最终要保存的状态
     else:
+        # 如果首次运行没找到带标签的文章
         print(f"First run, but no posts found with the required tag '{REQUIRED_TAG}'.")
         if newest_guid_in_this_run:
-             latest_guid_to_save = newest_guid_in_this_run # 标记要保存最新文章的GUID
+             latest_guid_to_save = newest_guid_in_this_run 
              print(f"Will update state to newest overall post GUID found in feed ({latest_guid_to_save}) after run.")
 
 # --- 发布推文 ---

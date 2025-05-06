@@ -1,6 +1,12 @@
 # .github/workflows/sync_to_x.yml
 name: Sync Blog Posts to X
 
+# 新增权限声明
+permissions:
+  actions: read    # 允许读取同一仓库中其他工作流运行的信息/Artifacts
+  contents: read  # 允许签出代码库 (actions/checkout 需要)
+
+  
 on:
   workflow_dispatch: 
   workflow_run:
