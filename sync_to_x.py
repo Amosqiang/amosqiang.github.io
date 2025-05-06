@@ -142,11 +142,11 @@ if posts_found_since_last:
     print(f"Found {len(posts_found_since_last)} new post(s) with tag '{REQUIRED_TAG}' to tweet.")
     # 反转列表，使得发帖顺序是从旧到新
     for guid, title, link in reversed(posts_found_since_last):
-        tweet_text = f"New Post: {title} {link}"
+        tweet_text = f"{title} {link}"
         if len(tweet_text) > 280:
-            available_len = 280 - len(f"New Post: ... {link}")
+            available_len = 280 - len(f"... {link}")
             if available_len > 0:
-                tweet_text = f"New Post: {title[:available_len]}... {link}"
+                tweet_text = f"{title[:available_len]}... {link}"
             else: 
                 print(f"Warning: Cannot shorten tweet sufficiently for '{title}'. Skipping.")
                 continue 
