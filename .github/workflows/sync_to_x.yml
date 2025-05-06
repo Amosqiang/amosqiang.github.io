@@ -1,12 +1,11 @@
 # .github/workflows/sync_to_x.yml
 name: Sync Blog Posts to X
 
-# 新增权限声明
+# 增加 contents: write 权限允许推送提交
 permissions:
-  actions: read    # 允许读取同一仓库中其他工作流运行的信息/Artifacts
-  contents: read  # 允许签出代码库 (actions/checkout 需要)
+  actions: read    
+  contents: write # 必须有 write 权限才能 commit & push
 
-  
 on:
   workflow_dispatch: 
   workflow_run:
@@ -19,21 +18,27 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: '3.9'
-      STATE_FILE_PATH: './last_post_guid.txt' # 脚本读写状态文件的路径
-      ARTIFACT_NAME: 'last-post-state'      # 用于存储状态文件的 Artifact 名称
+      STATE_FILE_PATH: './last_post_guid.txt' # 脚本读写状态文件的路径 (在仓库根目录)
       RSS_FEED_URL: 'https://amosqiang.github.io/feed.xml'
+      # Git 提交使用的用户名和邮箱
+      COMMIT_USER_NAME: 'github-actions[bot]'
+      COMMIT_USER_EMAIL: 'github-actions[bot]@users.noreply.github.com'
+      COMMIT_MESSAGE: 'chore: Update last tweeted post GUID' # 提交信息
 
     steps:
-      # 步骤 1: 签出代码库
+      # 步骤 1: 签出代码库 (现在会自动包含仓库中的 state 文件)
       - name: Checkout repository
         uses: actions/checkout@v4
+        # 如果需要推送，可能需要设置 token，但 GITHUB_TOKEN 在有 write 权限时通常足够
+        # with:
+        #  token: ${{ secrets.GITHUB_TOKEN }}
 
       # 步骤 2: 设置 Python 环境
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip' # 保留 pip 的缓存
+          cache: 'pip' 
 
       # 步骤 3: 安装依赖库
       - name: Install dependencies
@@ -41,26 +46,16 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       
-# 步骤 4: 下载上次的状态文件 Artifact (如果存在)
-      - name: Download last state artifact
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ./ 
-          # 修改这里：使用 workflow 的 name 而不是 ID
-          workflow: 'Sync Blog Posts to X' # <-- 使用 YAML 文件顶部的 name 值
-          workflow_conclusion: success
-          branch: main 
-        continue-on-error: true
+      # !!! 移除了 Artifact 下载步骤 !!!
 
-      # 步骤 5: (可选) 等待 Feed 更新
+      # 步骤 4: (可选) 等待 Feed 更新
       - name: Wait for feed propagation (optional)
         run: sleep 15s 
         shell: bash
 
-      # 步骤 6: 运行同步脚本
+      # 步骤 5: 运行同步脚本 (脚本本身无需改动)
       - name: Run sync script
-        id: sync_script # 给步骤一个 ID，方便后续引用其状态
+        id: sync_script 
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
@@ -68,20 +63,41 @@ jobs:
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
           RSS_FEED_URL: ${{ env.RSS_FEED_URL }}
           STATE_FILE_PATH: ${{ env.STATE_FILE_PATH }}
-          REQUIRED_TAG: "X" # 确保标签正确，或从 env/secrets 读取
+          REQUIRED_TAG: "X" 
         run: python sync_to_x.py 
 
-      # 步骤 7: 上传当前的状态文件 Artifact (如果脚本成功执行)
-      - name: Upload current state artifact
-        # 仅当 sync_script 步骤本身成功完成时 (不一定意味着推文发送成功)
-        if: steps.sync_script.outcome == 'success' 
-        uses: actions/upload-artifact@v4
-        with:
-          # 上传名为 ARTIFACT_NAME 的 Artifact
-          name: ${{ env.ARTIFACT_NAME }}
-          # 上传 STATE_FILE_PATH 指定的文件
-          path: ${{ env.STATE_FILE_PATH }} 
-          # 如果文件不存在 (例如脚本出错没生成)，则忽略
-          if-no-files-found: ignore 
-          # 设置 Artifact 的保留天数 (可选, 默认90天)
-          # retention-days: 7
+      # !!! 新增步骤：提交并推送状态文件 (如果它被修改了) !!!
+      - name: Configure Git User
+        # 配置用于提交的用户名和邮箱
+        run: |
+          git config user.name "${{ env.COMMIT_USER_NAME }}"
+          git config user.email "${{ env.COMMIT_USER_EMAIL }}"
+          
+      - name: Check for changes in state file
+        id: git_status
+        run: |
+          # 将状态文件添加到暂存区，以便检测更改
+          # 如果文件不存在或未被修改，git add 不会报错
+          git add ${{ env.STATE_FILE_PATH }} || echo "State file likely doesn't exist yet."
+          # 检查暂存区是否有关于这个文件的更改
+          if git diff --staged --quiet --exit-code ${{ env.STATE_FILE_PATH }}; then
+            echo "State file unchanged or does not exist."
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "State file changed."
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push state file if changed
+        # 仅当 git_status 步骤检测到更改时运行
+        if: steps.git_status.outputs.changed == 'true' 
+        run: |
+          echo "Attempting to commit and push updated state file..."
+          git commit -m "${{ env.COMMIT_MESSAGE }}"
+          # 尝试推送，如果失败（例如因为远程有更新），尝试拉取并重新推送
+          # 注意：如果同时有其他人/流程修改了 main 分支，这里可能需要更复杂的冲突处理
+          # 但对于一个主要由此 Action 修改的状态文件，通常是安全的
+          git push origin main || (sleep 5 && git pull origin main --rebase && git push origin main)
+          echo "State file committed and pushed."
+          
+      # !!! 移除了 Artifact 上传步骤 !!!
