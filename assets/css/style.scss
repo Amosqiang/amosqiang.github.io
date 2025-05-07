@@ -44,60 +44,60 @@ h1.page-heading {
 // --- H1 标题样式结束 ---
 
 
-/* --- 文章列表样式 (悬挂缩进 - 绝对定位法 - 再次尝试精确对齐) --- */
-/* !!! 请删除或注释掉所有其他版本的 ul.posts 或 ul.posts-grid-layout 的 CSS 规则 !!! */
-
+/* --- 文章列表样式 (保留你的定位值，仅添加 z-index 修正点击问题) --- */
 ul.posts { 
   list-style-type: none;  
-  padding-left: 0;      /* ul 本身不缩进，其内容区的左边缘与 h1.page-heading 对齐 */
-  margin-left: 0;          
+  padding-left: 0;    /* ul 本身不缩进 */
+  margin-left: 0;         
   margin-top: 0;          
-  margin-bottom: 1.5em;     
+  margin-bottom: 2em;    
 }
 
 ul.posts li { 
   position: relative;     /* 为内部绝对定位的 span 提供参照 */
-  margin-bottom: 0.1em;  /* <<< 非常关键：减小列表项间距，使其更紧凑 (可尝试 0.1em 至 0.3em) */
-  line-height: 1。3;       /* <<< 非常关键：减小行高，使其更紧凑 (可尝试 1.2 至 1.4) */
-  padding-left: 0;        /* li 本身不加内边距，标题的缩进由其自身的 margin-left 控制 */
+  margin-bottom: 0.1em;   /* 你的值 */
+  line-height: 1.3;       /* 你的值 (确保是 1.3 而不是 1。3) */
+  padding-left: 0;        /* li 本身不加内边距 */
 }
 
 /* 文章标题链接 - 这是对齐的基准 */
 a.post-link-title-custom { 
   display: inline-block; 
   vertical-align: baseline; 
-  font-size: 0.8em;       /* 列表中的文章标题字号 */
-  /* **核心1**: 这个 margin-left 将标题推向右侧，为日期和分隔符腾出【总悬挂空间】*/
-  /* 这个值应该等于 日期宽度 + 分隔符宽度 */
-  margin-left: 7em;      /* <<< 初始尝试值 (例如：日期6.5em + 分隔符1.3em)。你需要微调! */
+  font-size: 0.8em;       /* 你的值 */
+  margin-left: 7em;       /* 你的值 */
+  position: relative;     /* 新增：为 z-index 生效 */
+  z-index: 2;             /* 新增：确保链接在最上层 */
 }
 
 /* 日期 - 绝对定位到标题左侧 */
 span.post-date-custom { 
   position: absolute;     
-  left: -160px;              /* 从 li 的最左边开始定位 */
-  top: 0;                 /* 与 li 顶部对齐 (或用 padding-top 微调垂直位置) */
-  width: 20em;           /* <<< 核心2: 日期区块宽度 (你需要微调!) */
+  left: -160px;           /* 你的值 */
+  top: 0.4em;                 /* 你的值 (之前是0，可根据垂直对齐调整为如0.1em) */
+  width: 20em;            /* 你的值 */
   display: inline-block;  
   color: #aaa;             
   font-family: Monaco, "Courier New", monospace; 
-  font-size: 68%;         /* 日期字号 (相对于 li) */
-  text-align: right;      /* 日期文本在自己的区域内右对齐 */
-  line-height: inherit;   /* 继承 li 行高 */
+  font-size: 68%;         /* 你的值 */
+  text-align: right;      
+  line-height: inherit;   
+  z-index: 1;             /* 新增：确保在链接下方 */
 }
 
 /* 分隔符 - 绝对定位到日期之后，标题之前 */
 span.post-separator-custom { 
   position: absolute;
-  left: -8.4em;            /* <<< 核心3: 应等于上面日期的 width */
-  top: 0.1;                 
-  width: 30em;           /* <<< 核心4: 分隔符区块宽度 (你需要微调!) */
+  left: -8.4em;           /* 你的值 */
+  top: 0.2em;             /* 你的值 (确保单位正确，如 0.1em) */
+  width: 30em;            /* 你的值 */
   display: inline-block;  
   color: #aaa;            
   font-family: Monaco, "Courier New", monospace; 
-  font-size: 75%;         
-  text-align: center;     /* 分隔符 "»" 在其小区域内居中 */
+  font-size: 75%;         /* 你的值 */
+  text-align: center;     
   line-height: inherit;   
+  z-index: 1;             /* 新增：确保在链接下方 */
 }
 /* --- 文章列表样式结束 --- */
 
@@ -124,7 +124,10 @@ span.post-separator-custom {
 
 
 /* --- 你原始的 .writing-list 样式 (注释掉) --- */
-/* ... */
+/*
+.writing-list { ... }
+@media screen and (max-width: 375px) { ... }
+*/
 /* --- End Original .writing-list Styles --- */
 
 
