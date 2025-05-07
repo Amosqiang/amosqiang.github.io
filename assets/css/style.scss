@@ -18,7 +18,7 @@ main.page-content { padding-top: 0.8em; padding-bottom: 0.8em; flex: 1; }
 
 // --- 网站主标题样式 ---
 a.site-title, a.site-title:visited { 
-  color: #a00; font-size: 1.1rem; font-weight: bold; text-decoration: none; 
+  color: #a00; font-size: 1rem; font-weight: bold; text-decoration: none; 
   line-height: normal; flex-shrink: 0; 
 }
 a.site-title:hover { color: #111; text-decoration: none; }
@@ -29,7 +29,7 @@ a.site-title:hover { color: #111; text-decoration: none; }
 a.site-title, .site-nav { float: none; line-height: normal; }
 .site-nav { margin-left: 1.5em; }
 .site-nav .page-link {
-  color: #aaa; font-size: 0.85rem; font-weight: normal; text-decoration: none;
+  color: #aaa; font-size: 0.75rem; font-weight: normal; text-decoration: none;
   line-height: inherit; padding: 5px 0;         
   &:not(:last-child) { margin-right: 10px; }
 }
@@ -38,52 +38,71 @@ a.site-title, .site-nav { float: none; line-height: normal; }
 
 // --- 首页列表上方 H1 标题 ---
 h1.page-heading { 
-  font-size: 1.2em; font-weight: bold; color: #333;          
+  font-size: 0.9em; font-weight: bold; color: #333;          
   margin-top: 0; margin-bottom: 0.8em;   
 }
 // --- H1 标题样式结束 ---
 
 
-/* --- 文章列表样式 (悬挂缩进 - 绝对定位法) --- */
-/* !!! 请删除或注释掉之前所有关于 ul.posts-grid, li.post-item-grid 等 Grid 布局的规则 !!! */
+/* --- 文章列表样式 (悬挂缩进 - 绝对定位法 - 再次尝试精确对齐) --- */
+/* !!! 请删除或注释掉所有其他版本的 ul.posts 或 ul.posts-grid-layout 的 CSS 规则 !!! */
 
-ul.posts { /* 对应 HTML 中的 <ul class="posts"> */
+ul.posts { 
   list-style-type: none;  
+  padding-left: 0;      /* ul 本身不缩进，其内容区的左边缘与 h1.page-heading 对齐 */
+  margin-left: 0;          
   margin-top: 0;          
   margin-bottom: 1.5em;     
-  padding-left: 9em;  /* <-- **重要**: 为日期腾出空间 (可调整) */
-  margin-left: 0;       /* 覆盖可能的默认 ul 外边距 */  
 }
 
-ul.posts li { /* 对应 HTML 中的 <li> */
-  position: relative;     /* <-- **重要**: 为日期绝对定位提供参照 */
-  margin-bottom: 0.3em;   /* <-- 列表项之间的间距，调小使其紧凑 (可调整) */
-  padding-left: 0;        /* 确保 li 自身没有内边距干扰 */
-  line-height: 1.5;       /* 基础行高 (可调整) */
+ul.posts li { 
+  position: relative;     /* 为内部绝对定位的 span 提供参照 */
+  margin-bottom: 0.1em;  /* <<< 非常关键：减小列表项间距，使其更紧凑 (可尝试 0.1em 至 0.3em) */
+  line-height: 1.3;       /* <<< 非常关键：减小行高，使其更紧凑 (可尝试 1.2 至 1.4) */
+  padding-left: 0;        /* li 本身不加内边距，标题的缩进由其自身的 margin-left 控制 */
 }
 
-span.post-date-tom-style { /* 对应 HTML 中的 <span class="post-date-tom-style"> */
-  position: absolute;     /* <-- **重要**: 绝对定位 */
-  left: -9em;             /* <-- **重要**: 向左移动 (等于 ul 的 padding-left 负值) */
-  top: 0;                 /* <-- 与 li 顶部对齐 */
-  width: 7.5em;           /* <-- 日期宽度 (可调整) */
-  display: inline-block;  /* 让宽度生效 */
-  margin-right: 0;        /* 绝对定位后不再需要右边距 */
+/* 文章标题链接 - 这是对齐的基准 */
+a.post-link-title-custom { 
+  display: inline-block; 
+  vertical-align: baseline; 
+  font-size: 0.8em;       /* 列表中的文章标题字号 */
+  /* **核心1**: 这个 margin-left 将标题推向右侧，为日期和分隔符腾出【总悬挂空间】*/
+  /* 这个值应该等于 日期宽度 + 分隔符宽度 */
+  margin-left: 7em;      /* <<< 初始尝试值 (例如：日期6.5em + 分隔符1.3em)。你需要微调! */
+}
+
+/* 日期 - 绝对定位到标题左侧 */
+span.post-date-custom { 
+  position: absolute;     
+  left: -160px;              /* 从 li 的最左边开始定位 */
+  top: 0;                 /* 与 li 顶部对齐 (或用 padding-top 微调垂直位置) */
+  width: 20em;           /* <<< 核心2: 日期区块宽度 (你需要微调!) */
+  display: inline-block;  
   color: #aaa;             
-  font-family: Monaco, "Courier New", monospace; /* 等宽字体 */
-  font-size: 75%;         /* 日期字号 */
-  text-align: right;      /* 日期右对齐 */
-  line-height: inherit;   /* <-- **重要**: 继承 li 行高，帮助垂直对齐 */
+  font-family: Monaco, "Courier New", monospace; 
+  font-size: 68%;         /* 日期字号 (相对于 li) */
+  text-align: right;      /* 日期文本在自己的区域内右对齐 */
+  line-height: inherit;   /* 继承 li 行高 */
 }
 
-/* 列表项中的分隔符和链接 a 标签会自然地从 li 的内容区 (padding 左侧) 开始排列 */
-ul.posts li a {
-  /* 继承全局 'a' 样式 */
+/* 分隔符 - 绝对定位到日期之后，标题之前 */
+span.post-separator-custom { 
+  position: absolute;
+  left: -8.4em;            /* <<< 核心3: 应等于上面日期的 width */
+  top: 0;                 
+  width: 30em;           /* <<< 核心4: 分隔符区块宽度 (你需要微调!) */
+  display: inline-block;  
+  color: #aaa;            
+  font-family: Monaco, "Courier New", monospace; 
+  font-size: 75%;         
+  text-align: center;     /* 分隔符 "»" 在其小区域内居中 */
+  line-height: inherit;   
 }
 /* --- 文章列表样式结束 --- */
 
 
-/* --- 页脚样式 (Flexbox 布局 和 span 结构) --- */
+/* --- 页脚样式 --- */
 .site-footer {
   border-top: 4px solid #eee; padding-top: 0.3em; padding-bottom: 1.5em; 
   padding-left: 0; padding-right: 0; margin-top: 1.2em; 
@@ -105,10 +124,7 @@ ul.posts li a {
 
 
 /* --- 你原始的 .writing-list 样式 (注释掉) --- */
-/*
-.writing-list { ... }
-@media screen and (max-width: 375px) { ... }
-*/
+/* ... */
 /* --- End Original .writing-list Styles --- */
 
 
