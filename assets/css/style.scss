@@ -58,7 +58,7 @@ ul.posts {
 ul.posts li { 
   position: relative;     /* 为内部绝对定位的 span 提供参照 */
   margin-bottom: 0.1em;  /* <<< 非常关键：减小列表项间距，使其更紧凑 (可尝试 0.1em 至 0.3em) */
-  line-height: 1.3;       /* <<< 非常关键：减小行高，使其更紧凑 (可尝试 1.2 至 1.4) */
+  line-height: 1。3;       /* <<< 非常关键：减小行高，使其更紧凑 (可尝试 1.2 至 1.4) */
   padding-left: 0;        /* li 本身不加内边距，标题的缩进由其自身的 margin-left 控制 */
 }
 
@@ -90,7 +90,7 @@ span.post-date-custom {
 span.post-separator-custom { 
   position: absolute;
   left: -8.4em;            /* <<< 核心3: 应等于上面日期的 width */
-  top: 0;                 
+  top: 0.1;                 
   width: 30em;           /* <<< 核心4: 分隔符区块宽度 (你需要微调!) */
   display: inline-block;  
   color: #aaa;            
