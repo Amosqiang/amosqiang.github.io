@@ -13,26 +13,25 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout private source repo
+      - name: Checkout private source
         uses: actions/checkout@v4
-      
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2
           bundler-cache: true
 
-      - name: Build site with Jekyll
+      - name: Build with Jekyll
         run: |
           bundle install
           bundle exec jekyll build -d _site
 
-      - name: Upload site artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          path: _site
 
   deploy:
     needs: build
@@ -40,10 +39,6 @@ jobs:
     permissions:
       pages: write
       id-token: write
-
-    environment:
-      name: github-pages
-      url: https://amosqiang.github.io
 
     steps:
       - name: Deploy to Public Repo
