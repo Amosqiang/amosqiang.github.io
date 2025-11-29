@@ -2,8 +2,7 @@ name: Build and Deploy Jekyll Site
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -14,23 +13,23 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout
+      - name: Checkout private source repo
         uses: actions/checkout@v4
-
+      
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: 3.2
           bundler-cache: true
 
-      - name: Build Jekyll Site
+      - name: Build site with Jekyll
         run: |
           bundle install
-          bundle exec jekyll build -d ./_site
+          bundle exec jekyll build -d _site
 
-      - name: Upload artifact
+      - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./_site
@@ -38,11 +37,17 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: https://amosqiang.github.io
 
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - name: Deploy to Public Repo
         uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+          repository: Amosqiang/amosqiang.github.io
