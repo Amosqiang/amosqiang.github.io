@@ -1,0 +1,46 @@
+# ==============================
+# Jekyll build output (must ignore)
+# ==============================
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# ==============================
+# Ruby & Bundler files
+# ==============================
+vendor/
+.bundle/
+Gemfile.lock
+
+# ==============================
+# Python cache (sync_to_x.py)
+# ==============================
+__pycache__/
+*.pyc
+
+# ==============================
+# OS / Editor files
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# Node (if present)
+# ==============================
+node_modules/
+
+# ==============================
+# Netlify folder (you used it before, no longer needed)
+# ==============================
+.netlify/
+
+# ==============================
+# Do NOT ignore these (important!)
+# ==============================
+!.github/
+!sync_to_x.py
+!deploy.sh
+!last_post_guid.txt
+!Gemfile
+!_config.yml
