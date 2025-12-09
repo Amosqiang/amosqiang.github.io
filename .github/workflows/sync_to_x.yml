@@ -1,0 +1,82 @@
+# .github/workflows/sync_to_x.yml
+name: Sync Blog Posts to X
+
+permissions:
+  contents: write   # 允许提交 last_post_guid.txt
+
+on:
+  # 1）每次静态站有新部署（即 main 有新 commit）就跑一次
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'last_post_guid.txt'   # 自己更新状态文件时不要再次触发自己
+  # 2）可以在 Actions 里手动点运行
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    env:
+      # --- 配置区 ---
+      PYTHON_VERSION: '3.11'
+      STATE_FILE_PATH: './last_post_guid.txt'    # 状态文件路径（相对于仓库根目录）
+      RSS_FEED_URL: 'https://amosqiang.github.io/index.xml'  # Hugo 全站 RSS
+      COMMIT_USER_NAME: 'github-actions[bot]'
+      COMMIT_USER_EMAIL: 'github-actions[bot]@users.noreply.github.com'
+      COMMIT_MESSAGE: 'chore: update last tweeted post GUID'
+      REQUIRED_TAG: "X"          # 你的“触发发 X”的标签（大小写不敏感）
+      TWEET_FORMAT: "{title} {link}"   # 推文格式模板，可用 {title} / {link}
+      # --- 配置区结束 ---
+
+    steps:
+      # 步骤 1: 签出仓库（包含状态文件）
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 步骤 2: 设置 Python 环境
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      # 步骤 3: 安装依赖（只装这两个就够用）
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install feedparser tweepy
+
+      # 步骤 4: 等 RSS 刷新（可按需要改时间）
+      - name: Wait for feed propagation (optional)
+        run: sleep 30s
+
+      # 步骤 5: 跑同步脚本
+      - name: Run sync script
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          RSS_FEED_URL: ${{ env.RSS_FEED_URL }}
+          STATE_FILE_PATH: ${{ env.STATE_FILE_PATH }}
+          REQUIRED_TAG: ${{ env.REQUIRED_TAG }}
+          TWEET_FORMAT: ${{ env.TWEET_FORMAT }}
+        run: python sync_to_x.py
+
+      # 步骤 6: 如果状态文件有变化，就提交回 main
+      - name: Configure Git User
+        run: |
+          git config user.name "${{ env.COMMIT_USER_NAME }}"
+          git config user.email "${{ env.COMMIT_USER_EMAIL }}"
+
+      - name: Commit and push state file (if changed)
+        run: |
+          git add ${{ env.STATE_FILE_PATH }} || echo "State file not found or could not be added."
+          if git diff --staged --quiet; then
+            echo "No changes detected in state file to commit."
+          else
+            echo "State file changed. Committing and pushing..."
+            git commit -m "${{ env.COMMIT_MESSAGE }}"
+            git push origin main
+          fi
