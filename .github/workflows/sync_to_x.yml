@@ -17,11 +17,11 @@ jobs:
     env:
       PYTHON_VERSION: '3.11'
       STATE_FILE_PATH: './last_post_guid.txt'
-      RSS_FEED_URL: 'https://amosqiang.github.io/index.xml'
+      RSS_FEED_URL: 'https://amosqiang.github.io/tags/x/index.xml'
       COMMIT_USER_NAME: 'github-actions[bot]'
       COMMIT_USER_EMAIL: 'github-actions[bot]@users.noreply.github.com'
       COMMIT_MESSAGE: 'chore: update last tweeted post GUID'
-      REQUIRED_TAG: "X"
+      REQUIRED_TAG: ""
       TWEET_FORMAT: "{title} {link}"
 
     steps:
