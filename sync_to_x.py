@@ -1,12 +1,8 @@
-cd /Users/tnt/Documents/Blog/amosqiang.github.io
-
-cat > sync_to_x.py << 'EOF'
 import os
 import time
 import feedparser
 import tweepy
 
-# 从环境变量读取 Secrets 和配置
 API_KEY = os.environ.get("X_API_KEY")
 API_SECRET = os.environ.get("X_API_SECRET")
 ACCESS_TOKEN = os.environ.get("X_ACCESS_TOKEN")
@@ -19,7 +15,6 @@ TWEET_FORMAT = os.environ.get("TWEET_FORMAT", "{title} {link}")
 
 
 def get_last_posted_guid(file_path: str) -> str | None:
-    """从状态文件中读取上次发布的文章 GUID"""
     try:
         if os.path.exists(file_path):
             with open(file_path, "r") as f:
@@ -34,7 +29,6 @@ def get_last_posted_guid(file_path: str) -> str | None:
 
 
 def update_last_posted_guid(file_path: str, guid: str) -> bool:
-    """将最新的 GUID 写入状态文件"""
     try:
         with open(file_path, "w") as f:
             f.write(guid)
@@ -46,12 +40,6 @@ def update_last_posted_guid(file_path: str, guid: str) -> bool:
 
 
 def post_tweet(text: str) -> str:
-    """
-    使用 Tweepy V2 API 发布推文，处理重复错误并返回状态：
-    - "success"
-    - "duplicate"
-    - "error"
-    """
     if not all([API_KEY, API_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET]):
         print("Error: Missing API credentials in environment variables.")
         return "error"
@@ -95,7 +83,6 @@ def main() -> int:
         print("No entries found in the RSS feed.")
         return 0
 
-    # 取本次抓取到的最新一篇文章的 GUID（用于首次运行但没找到 X 标签文章时更新状态）
     first_entry = feed.entries[0]
     newest_guid_in_run = (
         getattr(first_entry, "id", None)
@@ -106,7 +93,6 @@ def main() -> int:
     posts_to_tweet: list[dict] = []
     found_last_marker = False
 
-    # 遍历 Feed（一般是新到旧）
     for entry in feed.entries:
         entry_guid = (
             getattr(entry, "id", None)
@@ -126,7 +112,6 @@ def main() -> int:
             found_last_marker = True
             break
 
-        # 检查标签是否包含 REQUIRED_TAG
         has_required_tag = False
         if hasattr(entry, "tags") and isinstance(entry.tags, list):
             for tag_info in entry.tags:
@@ -150,11 +135,9 @@ def main() -> int:
     latest_guid_to_save = None
     final_state_updated = False
 
-    # 首次运行或状态缺失的情况
     if last_guid is None:
         print("First run (or state lost).")
         if posts_to_tweet:
-            # 列表是新到旧，选第一个作为“最新有 X 标签的文章”
             newest_tagged = posts_to_tweet[0]
             print(
                 "First run: Selecting only the newest post "
@@ -171,10 +154,8 @@ def main() -> int:
                     f"found in feed: {latest_guid_to_save}"
                 )
 
-    # 发布推文
     if posts_to_tweet:
         print(f"Found {len(posts_to_tweet)} new post(s) with tag '{REQUIRED_TAG}'.")
-        # 先旧后新发，反转一下
         for post in reversed(posts_to_tweet):
             guid = post["guid"]
             title = post["title"]
@@ -189,7 +170,6 @@ def main() -> int:
                 )
                 continue
 
-            # 简单长度检查，超 280 截断
             if len(tweet_text) > 280:
                 print(
                     f"Warning: Tweet text exceeds 280 characters "
@@ -218,7 +198,6 @@ def main() -> int:
                 else:
                     print("Error updating state file! Stopping further posts.")
                     break
-                # 简单间隔控制
                 wait_time = 5 if result == "duplicate" else 10
                 print(f"Waiting {wait_time} seconds...")
                 time.sleep(wait_time)
@@ -234,7 +213,6 @@ def main() -> int:
                 f"No new posts found with tag '{REQUIRED_TAG}' since the last run."
             )
 
-    # 首次运行且没发任何 tweet，但我们知道最新一篇的 GUID，可以更新状态文件
     if not final_state_updated and last_guid is None and latest_guid_to_save:
         print("Performing state update for first run (no tweets sent).")
         update_last_posted_guid(STATE_FILE_PATH, latest_guid_to_save)
@@ -245,4 +223,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-EOF
