@@ -40,7 +40,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install feedparser tweepy
+          pip install -r requirements.txt
+
 
       - name: Wait for feed propagation (optional)
         run: sleep 30s
