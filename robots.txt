@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://amosqiang.github.io/sitemap.xml
