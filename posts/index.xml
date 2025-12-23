@@ -17,10 +17,5 @@
 &lt;li&gt;&lt;strong&gt;Hugo 官方支持 Docker&lt;/strong&gt;，本地预览不再依赖复杂的环境配置。&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;支持双仓布置&lt;/strong&gt;：私有仓放完整源码，公开仓只放静态网页，结构更清爽也更安全。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h2 id="迁移后的结构与体验"&gt;迁移后的结构与体验&lt;/h2&gt;
-&lt;p&gt;迁移到 Hugo 后，构建速度明显更快，配置也更直观。&lt;br&gt;
-下面这张图记录了我在迁移过程中的核心结构与思路。&lt;/p&gt;
-&lt;p&gt;&lt;img loading="lazy" src="https://amosqiang.github.io/posts/2025/%E4%BB%8Ejekyll-%E5%88%B0-hugo/image.png"&gt;&lt;/p&gt;
-&lt;h2 id="小结"&gt;小结&lt;/h2&gt;
-&lt;p&gt;Jekyll 帮我迈出了第一步，而 Hugo 让我更专注于写作本身。&lt;br&gt;
-从环境折腾转向内容表达，是这次迁移最大的价值。&lt;/p&gt;</description></item></channel></rss>
+&lt;h2 id="我使用的工具和方法"&gt;我使用的工具和方法&lt;/h2&gt;
+&lt;p&gt;我主要是使用的是&lt;strong&gt;chagpt&lt;/strong&gt;，没会员的时候用 gemini 和 grok，从 chatgpt3.5（没开会员）到 chatgpt4（开了 plus 会员）到 4o，直到现在最新版本 vscode 里面的 codex（GPT-5.2-Codex Extra high 模式），越来越好用的 ai 真的让我这个小白实现了几乎免费的建站梦。（其他段落均用 codex 总结的）&lt;/p&gt;</description></item></channel></rss>
